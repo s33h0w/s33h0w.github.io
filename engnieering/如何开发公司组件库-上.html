@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 3.9.0">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon.ico">
+  <link rel="alternate" href="/atom.xml" title="s33h0w" type="application/atom+xml">
+  <meta name="google-site-verification" content="8RSRHXGE7qa0lM0SZqS5rLk_KUrRzq-kcvjEgS9Bk7w">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Noto Sans SC:300,300italic,400,400italic,700,700italic|Fira Code:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '7.5.0',
+    exturl: true,
+    sidebar: {"position":"right","width":270,"display":"post","offset":12,"onmobile":false},
+    copycode: {"enable":true,"show_result":true,"style":"flat"},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="前端业务是依托于组件实现的，随着公司业务不断增多，从那些功能相似的业务中可以抽离出一些公共组件，形成公司的组件库。组件库的开发是一项复杂的工作，除需实现功能之外还要考虑构建、发布、测试等一系列因素。但一个经过良好设计的成熟组件库往往会在之后节省我们大量的时间，让我们能更快速高效的实现业务需求。这篇文章是我在开发公司组件库时的一些实践分享，希望能对大家有所帮助。本文基于 Angular 框架，Rea">
+<meta name="keywords" content="Angular,前端">
+<meta property="og:type" content="article">
+<meta property="og:title" content="如何开发公司组件库(上)">
+<meta property="og:url" content="https://s33h0w.me/engnieering/如何开发公司组件库-上.html">
+<meta property="og:site_name" content="s33h0w">
+<meta property="og:description" content="前端业务是依托于组件实现的，随着公司业务不断增多，从那些功能相似的业务中可以抽离出一些公共组件，形成公司的组件库。组件库的开发是一项复杂的工作，除需实现功能之外还要考虑构建、发布、测试等一系列因素。但一个经过良好设计的成熟组件库往往会在之后节省我们大量的时间，让我们能更快速高效的实现业务需求。这篇文章是我在开发公司组件库时的一些实践分享，希望能对大家有所帮助。本文基于 Angular 框架，Rea">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2021-02-21T14:43:16.243Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="如何开发公司组件库(上)">
+<meta name="twitter:description" content="前端业务是依托于组件实现的，随着公司业务不断增多，从那些功能相似的业务中可以抽离出一些公共组件，形成公司的组件库。组件库的开发是一项复杂的工作，除需实现功能之外还要考虑构建、发布、测试等一系列因素。但一个经过良好设计的成熟组件库往往会在之后节省我们大量的时间，让我们能更快速高效的实现业务需求。这篇文章是我在开发公司组件库时的一些实践分享，希望能对大家有所帮助。本文基于 Angular 框架，Rea">
+
+<link rel="canonical" href="https://s33h0w.me/engnieering/如何开发公司组件库-上.html">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>如何开发公司组件库(上) | s33h0w</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="site-title">s33h0w</span>
+      </a>
+    </div>
+        <h1 class="site-subtitle" itemprop="description">be indie</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-crow"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="搜索..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://s33h0w.me/engnieering/如何开发公司组件库-上.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/s33h0w.png">
+      <meta itemprop="name" content="s33h0w">
+      <meta itemprop="description" content="In the final analysis it is between you and God. It was never between you and them anyway.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="s33h0w">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          如何开发公司组件库(上)
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-11-12 14:49:21" itemprop="dateCreated datePublished" datetime="2019-11-12T14:49:21+08:00">2019-11-12</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>前端业务是依托于组件实现的，随着公司业务不断增多，从那些功能相似的业务中可以抽离出一些公共组件，形成公司的组件库。组件库的开发是一项复杂的工作，除需实现功能之外还要考虑构建、发布、测试等一系列因素。但一个经过良好设计的成熟组件库往往会在之后节省我们大量的时间，让我们能更快速高效的实现业务需求。这篇文章是我在开发公司组件库时的一些实践分享，希望能对大家有所帮助。本文基于 Angular 框架，React 和 VUE 基本思路大同小异。<br><a id="more"></a><br>在开发组件之前，我们需要做一些准备工作以确保所开发的组件能产生价值，包括：需求评审、调研同类型组件和发出组件issue。</p>
+<h2 id="需求评审"><a href="#需求评审" class="headerlink" title="需求评审"></a>需求评审</h2><p><em>这部分的内容需要由提出组件抽离需求的成员来完成。</em></p>
+<p>需求评审的意义在于确定组件开发的目的，没有经过需求评审就盲目开发的结果只能是浪费时间。需求评审需要确定以下几点内容：</p>
+<ol>
+<li><strong>哪些项目在使用以及组件需要具备的功能</strong><br>这是组件开发的意义所在，也是组件设计的依据，必须要给出具体的项目与功能描述。</li>
+<li><strong>是否有必要抽离组件</strong><br>组件开发一般耗时较长，要衡量利弊。一般优先抽取业务相关性较强的组件，比如标注器、关系图谱等或者非常通用能迅速节省开发时间的组件，比如权限模块、表格组件等等。</li>
+<li><strong>由谁负责组件开发和 Code Review</strong><br>组件的开发工作必须通过代码审查，以保证组件库的质量。因此在确定组件开发人员的时候需要指定人员负责 Code Review, 建议组件库有固定的成员负责 Code Review。</li>
+</ol>
+<h2 id="充分调研同类型组件"><a href="#充分调研同类型组件" class="headerlink" title="充分调研同类型组件"></a>充分调研同类型组件</h2><p>日光之下无新事，所需开发的组件往往并不新鲜早已被人实现，我们只需要在此基础上做一些调整即可。对已有的成熟组件的调研是十分必要的，它可以帮助我们避免因为自负犯下的错误。调研主要包括：</p>
+<ol>
+<li><strong>组件的使用方式</strong><br>对于 Angular 项目来讲，组件有多种表现形式可以提供功能。以<code>ng-zorro-antd</code>中的组件为例，<code>nz-button</code>通过指令(<code>DIRECTIVE</code>)的形式实现按钮相关功能，<code>nz-message</code>通过服务(<code>SERVICE</code>)来实现全局提示功能，<code>nz-table</code>以组件(<code>COMPONENT</code>)的形式实现功能，其内部又通过更细粒度的<code>th</code>和<code>td</code>组件与指令实现。可见不同用途的组件，其需要的使用方式也会有差异。调研的时候首先需要了解同类型的组件的使用方式。</li>
+<li><strong>组件的功能与对应 API 设计</strong><br>这里需要注意的是 API 的命名，通常来讲某些功能的命名是约定俗成的，比如数据类 API 一般为<code>*Data</code>。参考规范的 API 命名，尽量减少标新立异，使 API 易于理解。</li>
+<li><strong>组件及功能实现方式</strong><br>除了组件设计，还需要注意组件具体的实现方式。比如：组件类如何抽离依赖，组件的关键功能是如何实现的等等。</li>
+</ol>
+<h2 id="进行组件设计"><a href="#进行组件设计" class="headerlink" title="进行组件设计"></a>进行组件设计</h2><p>组件的设计主要包含组件的使用方式和 API。在这一步需要输出一份组件的使用范例以及根据功能设计的组件 API 列表。在进行组件设计的时候，可能会遇到以下的问题，这是我的一些看法。</p>
+<h3 id="公共组件里要不要出现业务逻辑"><a href="#公共组件里要不要出现业务逻辑" class="headerlink" title="公共组件里要不要出现业务逻辑"></a>公共组件里要不要出现业务逻辑</h3><p>组件是为了提供 UI 视图渲染。但是针对同样的 UI 视图渲染，不同的业务会引入不同的业务逻辑。比如用户列表组件与文章列表组件的 UI 视图渲染相同，但有着不同的业务逻辑（依赖的服务不同）。通常组件库不包含具体的业务逻辑，只封装组件自身 UI 逻辑与样式逻辑。那如果是公司的业务组件库，业务模式单一固定，为了方便快捷，是否应该将业务与组件 UI 逻辑耦合在组件内部呢？我的看法是，组件本身只应该承担视图渲染的作用，即便业务固定，也应该剥离业务逻辑去设计组件。固定的业务逻辑可以单独封装，没有必要与组件逻辑耦合。组件应该保持纯净。比如需要根据用户是否登录的状态下显示相应文字，我们应该提供一个可以只包含 UI 渲染（自定义显示文字）的组件而非一个包含业务逻辑（依赖于用户登录信息）的组件。如下所示：</p>
+<figure class="highlight ts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// 同时包含业务逻辑（用户信息服务）与 UI 渲染的组件</span></span><br><span class="line"><span class="meta">@Component</span>(&#123;</span><br><span class="line">  selector: <span class="string">'download-span'</span>,</span><br><span class="line">  template: <span class="string">`</span></span><br><span class="line"><span class="string">  &lt;button [disabled]="disabled"&gt;&#123;&#123;disabled?'无法下载':'下载'&#125;&#125;&lt;/button&gt;</span></span><br><span class="line"><span class="string">  `</span></span><br><span class="line">&#125;)</span><br><span class="line"><span class="keyword">class</span>  DownloadSpanComponent &#123;</span><br><span class="line">  <span class="keyword">constructor</span>(<span class="params"><span class="keyword">private</span> userService: UserService</span>) &#123;&#125;</span><br><span class="line">  <span class="keyword">get</span> disabled(): <span class="built_in">boolean</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> !userService.hasLogin()</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight ts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">//  不包含业务逻辑只包含 UI 渲染的组件</span></span><br><span class="line"><span class="meta">@Component</span>(&#123;</span><br><span class="line">  selector: <span class="string">'download-span'</span></span><br><span class="line">  template: <span class="string">`</span></span><br><span class="line"><span class="string">  &lt;button [disabled]="disabled"&gt;&#123;&#123;disabled?'无法下载':'下载'&#125;&#125;&lt;/button&gt;</span></span><br><span class="line"><span class="string">  `</span></span><br><span class="line">&#125;)</span><br><span class="line"><span class="keyword">class</span> DownloadSpanComponent &#123;</span><br><span class="line">  <span class="meta">@Input</span>()</span><br><span class="line">  disabled: <span class="built_in">boolean</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="如何去判断组件需要什么样的-API"><a href="#如何去判断组件需要什么样的-API" class="headerlink" title="如何去判断组件需要什么样的 API"></a>如何去判断组件需要什么样的 API</h3><p>建立在第一个问题的结论上，我们才能判断组件到底需要什么样的 API。首先组件的 API 必然是与组件的视图渲染相关的，比如 <code>[loading]</code>指定表格是否显示加载中视图，<code>[data]</code>指定表格中的每一个单元格中的具体内容。因此，API 的设计需要体现它所直接映射的功能。而且最好每一个 API 映射的功能是彼此独立的。其次，由于组件不包含业务逻辑，因此组件的 API 也应与业务无关。所以 API 不能带有具体的业务特征，比如不能添加一个<code>[showUserId]</code>用来表示用做用户列表时是否显示用户 ID列。最后，组件的设计绝不是为了符合所有的业务需求，也没有这个必要。因此，在设计 API 的时候应该考虑是否大多数场景都会需要用到这个 API。如果只是为了满足极少数的场景需求，那么就没有必要提供这个 API。因为很显然组件的功能越简单，组件的稳定性就会越好，拓展起来也越方便。特殊功能应该在具体的项目中进一步定制组件实现。</p>
+<h3 id="如何更新组件"><a href="#如何更新组件" class="headerlink" title="如何更新组件"></a>如何更新组件</h3><p>组件的设计不是一劳永逸，需要不断添加新的功能或更改已有的功能。在更新组件的时候，除了需要遵循以上两点讨论的结果外，还有一些需要考虑。首先保证新功能不会对已有的功能产生破坏，这是显而易见的。其次，更新的功能不可以由已有的功能单独或组合实现。比如添加新功能<code>[pagination]</code>表示表格的分页状况，这个功能可以用<code>[pageIndex]</code>与<code>[pageSize]</code>组合表示。</p>
+<h2 id="根据组件设计提出-issue"><a href="#根据组件设计提出-issue" class="headerlink" title="根据组件设计提出 issue"></a>根据组件设计提出 issue</h2><p>组件的 issue 必须要包含以下内容：简介、使用示例、功能列表和 API。除此以外，可以针对性的添加一些其他信息，比如动机、开发背景、迁移策略等等。在提出 issue 之后需要和同事积极讨论，至少需要确定功能列表和 API 满足大家的使用需求。issue 内容大致确定之后，可以点击 gitlab 提供的 Create merge request 按钮，提出一个 WIP 状态的MR。然后在默认提供的分支上开发组件。因为组件开发往往包含的代码量很多，如果开发结束之后再提出 MR，会导致负责 Code Review 非常困难。所以提前发起 MR，让开发的过程始终可见，也方便大家在 MR 下随时讨论。</p>
+<p>至此，组件开发的前期准备工作就完成了，接下来进入具体的组件开发环节。</p>
+<p>相关链接：<br><a href="https://s33h0w.me/2019/11/12/如何开发公司组件库-下/">如何开发公司组件库(下)</a></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tags/Angular/" rel="tag"><i class="fa fa-tag"></i> Angular</a>
+              <a href="/tags/前端/" rel="tag"><i class="fa fa-tag"></i> 前端</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-next post-nav-item">
+                <a href="/others/JavaScript中的原型链.html" rel="next" title="JavaScript中的原型链">
+                  <i class="fa fa-chevron-left"></i> JavaScript中的原型链
+                </a>
+            </div>
+
+            <span class="post-nav-divider"></span>
+
+            <div class="post-nav-prev post-nav-item">
+                <a href="/engnieering/如何开发公司组件库-下.html" rel="prev" title="如何开发公司组件库(下)">
+                  如何开发公司组件库(下) <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#需求评审"><span class="nav-number">1.</span> <span class="nav-text">需求评审</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#充分调研同类型组件"><span class="nav-number">2.</span> <span class="nav-text">充分调研同类型组件</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#进行组件设计"><span class="nav-number">3.</span> <span class="nav-text">进行组件设计</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#公共组件里要不要出现业务逻辑"><span class="nav-number">3.1.</span> <span class="nav-text">公共组件里要不要出现业务逻辑</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#如何去判断组件需要什么样的-API"><span class="nav-number">3.2.</span> <span class="nav-text">如何去判断组件需要什么样的 API</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#如何更新组件"><span class="nav-number">3.3.</span> <span class="nav-text">如何更新组件</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#根据组件设计提出-issue"><span class="nav-number">4.</span> <span class="nav-text">根据组件设计提出 issue</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="s33h0w"
+      src="/images/s33h0w.png">
+  <p class="site-author-name" itemprop="name">s33h0w</p>
+  <div class="site-description" itemprop="description">In the final analysis it is between you and God. It was never between you and them anyway.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">18</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="feed-link motion-element">
+    <a href="/atom.xml" rel="alternate">
+      <i class="fa fa-rss"></i>RSS
+    </a>
+  </div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3MzM2gwdw==" title="GitHub → https://github.com/s33h0w"><i class="fa fa-fw fa-github"></i></span>
+      </span>
+      <span class="links-of-author-item">
+        <span class="exturl" data-url="aHR0cHM6Ly93d3cuZG91YmFuLmNvbS9wZW9wbGUvNTY0MDAyMTQ=" title="豆瓣 → https://www.douban.com/people/56400214"><i class="fa fa-fw fa-custom douban"></i></span>
+      </span>
+      <span class="links-of-author-item">
+        <span class="exturl" data-url="aHR0cHM6Ly93d3cuemhpaHUuY29tL3Blb3BsZS9zMzNoMHc=" title="知乎 → https://www.zhihu.com/people/s33h0w"><i class="fa fa-fw fa-custom zhihu"></i></span>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-crow"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder"><span class="exturl theme-link" data-url="aHR0cHM6Ly9naXRodWIuY29tL3MzM2gwdw==">s33h0w</span>
+  </span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script>
+<script src="/js/schemes/muse.js"></script>
+<script src="/js/next-boot.js"></script>
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  <script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID: '911aba6a2761f62d8739',
+      clientSecret: '7df6a704729a996fc519bea74e3615f585b49d1c',
+      repo: 's33h0w.github.io',
+      owner: 's33h0w',
+      admin: ['s33h0w'],
+      id: '66b11ed0992cc94677a753bec1edabc8',
+        language: 'zh-CN',
+      distractionFreeMode: 'true'
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+</script>
+
+</body>
+</html>

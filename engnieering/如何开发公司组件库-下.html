@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 3.9.0">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon.ico">
+  <link rel="alternate" href="/atom.xml" title="s33h0w" type="application/atom+xml">
+  <meta name="google-site-verification" content="8RSRHXGE7qa0lM0SZqS5rLk_KUrRzq-kcvjEgS9Bk7w">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Noto Sans SC:300,300italic,400,400italic,700,700italic|Fira Code:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '7.5.0',
+    exturl: true,
+    sidebar: {"position":"right","width":270,"display":"post","offset":12,"onmobile":false},
+    copycode: {"enable":true,"show_result":true,"style":"flat"},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="在上一篇中介绍了在开发公司的组件库之前需要的准备工作，主要包括：需求评审、调研、组件设计和提出 issue。 本篇主要介绍在具体的开发环节需要注意哪些事项。">
+<meta name="keywords" content="Angular,前端">
+<meta property="og:type" content="article">
+<meta property="og:title" content="如何开发公司组件库(下)">
+<meta property="og:url" content="https://s33h0w.me/engnieering/如何开发公司组件库-下.html">
+<meta property="og:site_name" content="s33h0w">
+<meta property="og:description" content="在上一篇中介绍了在开发公司的组件库之前需要的准备工作，主要包括：需求评审、调研、组件设计和提出 issue。 本篇主要介绍在具体的开发环节需要注意哪些事项。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="https://s33h0w.me/images/gitflow">
+<meta property="og:image" content="https://s33h0w.me/images/githubflow">
+<meta property="og:updated_time" content="2021-02-21T14:43:16.243Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="如何开发公司组件库(下)">
+<meta name="twitter:description" content="在上一篇中介绍了在开发公司的组件库之前需要的准备工作，主要包括：需求评审、调研、组件设计和提出 issue。 本篇主要介绍在具体的开发环节需要注意哪些事项。">
+<meta name="twitter:image" content="https://s33h0w.me/images/gitflow">
+
+<link rel="canonical" href="https://s33h0w.me/engnieering/如何开发公司组件库-下.html">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>如何开发公司组件库(下) | s33h0w</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="site-title">s33h0w</span>
+      </a>
+    </div>
+        <h1 class="site-subtitle" itemprop="description">be indie</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-crow"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="搜索..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://s33h0w.me/engnieering/如何开发公司组件库-下.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/s33h0w.png">
+      <meta itemprop="name" content="s33h0w">
+      <meta itemprop="description" content="In the final analysis it is between you and God. It was never between you and them anyway.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="s33h0w">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          如何开发公司组件库(下)
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-11-12 14:54:37" itemprop="dateCreated datePublished" datetime="2019-11-12T14:54:37+08:00">2019-11-12</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>在<a href="https://s33h0w.me/2019/11/12/如何开发公司组件库-上/">上一篇</a>中介绍了在开发公司的组件库之前需要的准备工作，主要包括：需求评审、调研、组件设计和提出 issue。 本篇主要介绍在具体的开发环节需要注意哪些事项。<br><a id="more"></a></p>
+<h2 id="创建开发环境"><a href="#创建开发环境" class="headerlink" title="创建开发环境"></a>创建开发环境</h2><p> 组件开发的时候需要不断测试当前已开发的功能，这里建议单独配置一个私人 demo 项目用于本地开发。创建组件对应的初始库（详见Angular 的<span class="exturl" data-url="aHR0cHM6Ly9hbmd1bGFyLmNuL2d1aWRlL2NyZWF0aW5nLWxpYnJhcmllcw==" title="https://angular.cn/guide/creating-libraries">创建库<i class="fa fa-external-link"></i></span>），执行<code>ng build [库名称]</code>生成本地的组件库。配置完成后，使用<code>npm link</code>链接刚才打包好的组件库和 demo 项目，然后在 demo 项目的<code>angular.json</code>中添加<code>preserveSymlinks: true</code>（如下），完成创建开发环境。这是为了防止本地库的引用依赖错误。</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">    <span class="attr">"$schema"</span>: <span class="string">"./node_modules/@angular/cli/lib/config/schema.json"</span>,</span><br><span class="line">    <span class="attr">"version"</span>: <span class="number">1</span>,</span><br><span class="line">    <span class="attr">"newProjectRoot"</span>: <span class="string">"projects"</span>,</span><br><span class="line">    <span class="attr">"projects"</span>: &#123;</span><br><span class="line">        <span class="attr">"my-project"</span>: &#123;</span><br><span class="line">            <span class="attr">"root"</span>: <span class="string">""</span>,</span><br><span class="line">            <span class="attr">"sourceRoot"</span>: <span class="string">"src"</span>,</span><br><span class="line">            <span class="attr">"projectType"</span>: <span class="string">"application"</span>,</span><br><span class="line">            <span class="attr">"architect"</span>: &#123;</span><br><span class="line">                <span class="attr">"build"</span>: &#123;</span><br><span class="line">                    <span class="attr">"builder"</span>: <span class="string">"@angular-devkit/build-angular:browser"</span>,</span><br><span class="line">                    <span class="attr">"options"</span>: &#123;</span><br><span class="line">                       <span class="attr">"outputPath"</span>: <span class="string">"target"</span>,</span><br><span class="line">                       <span class="attr">"index"</span>: <span class="string">"src/index.html"</span>,</span><br><span class="line">                       <span class="attr">"main"</span>: <span class="string">"src/main.ts"</span>,</span><br><span class="line">                       <span class="attr">"tsConfig"</span>: <span class="string">"src/tsconfig.app.json"</span>,</span><br><span class="line">                       <span class="attr">"polyfills"</span>: <span class="string">"src/showcase/polyfills.ts"</span>,</span><br><span class="line">                       <span class="attr">"preserveSymlinks"</span>: <span class="literal">true</span>,</span><br><span class="line">...</span><br></pre></td></tr></table></figure>
+<h2 id="确定组件的开发方式"><a href="#确定组件的开发方式" class="headerlink" title="确定组件的开发方式"></a>确定组件的开发方式</h2><p>组件开发分为自行开发组件和基于第三方组件的二次封装，这两种在开发时略有不同。前者通常是从自身的业务抽离而来比如标注组件，后者通常会有比较成熟的开源方案可供使用比如表格、图谱等。通常自行开发组件的成本会比较高，在业务相关性低，交互逻辑复杂，有比较成熟的开源方案的情况下，最好基于第三方组件做二次封装。</p>
+<h3 id="中介者模式"><a href="#中介者模式" class="headerlink" title="中介者模式"></a>中介者模式</h3><p>二次封装通常有两种方式，可以用设计模式来表示：装饰者模式与中介者模式。</p>
+<p>装饰者模式是指在不改变原类及不使用继承的情况下，动态的扩展一个对象的功能。通常来说就是用装饰器来实现一些原第三方组件做不到的功能。这种模式并不常用，这里不多介绍。</p>
+<p>我们通常使用的是中介者模式。中介者模式是指用一个中介对象来封装一系列的对象交互，中介者使各对象不需要显式地相互引用，从而使其耦合松散，而且可以独立地改变它们之间的交互。<br>比如下面的例子中，<code>TableComponent</code>充当了一个中介者，将输入的<code>data</code>属性转化为第三方组件<code>st</code>可以接受的数据类型，因此可以不加修改的直接引用原来的组件。</p>
+<figure class="highlight ts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// table.component.ts</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">class</span> TableComponent <span class="keyword">implements</span> OnChanges &#123;</span><br><span class="line">  <span class="meta">@Input</span>()</span><br><span class="line">  data: Data[];</span><br><span class="line">  _data: STData[];</span><br><span class="line"></span><br><span class="line">  <span class="keyword">get</span> _data(): STData[] &#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="keyword">this</span>.data.map(<span class="function">(<span class="params">item, index</span>) =&gt;</span> &#123;</span><br><span class="line">      <span class="keyword">if</span> (<span class="keyword">this</span>.selectedRows &amp;&amp; <span class="keyword">this</span>.selectedRows.includes(index)) &#123;</span><br><span class="line">        <span class="keyword">return</span> &#123;</span><br><span class="line">          checked: <span class="literal">true</span>,</span><br><span class="line">          ...item</span><br><span class="line">        &#125;;</span><br><span class="line">      &#125;</span><br><span class="line">      <span class="keyword">return</span> item;</span><br><span class="line">    &#125;);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight html"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="tag">&lt;<span class="name">st</span> [<span class="attr">data</span>]=<span class="string">"_data"</span> <span class="attr">...</span>&gt;</span><span class="tag">&lt;/<span class="name">st</span>&gt;</span></span><br></pre></td></tr></table></figure>
+<h3 id="是否应该使用组件继承"><a href="#是否应该使用组件继承" class="headerlink" title="是否应该使用组件继承"></a>是否应该使用组件继承</h3><p>基于第三方组件的开发除了上述两种模式，其实还可以用继承来实现。Angular 的组件是使用<code>@Component</code>装饰器来实现的，因此组件的继承等同于 TypeScript 中带有类装饰器的类的继承。以下是一个组件继承的简单例子。像<code>DerivedComponent</code>一样，派生类如果拥有自己的<code>@Component</code>，其实相当于被两个<code>@Component</code>装饰器修饰过构造函数。根据 TypeScript 的<span class="exturl" data-url="aHR0cHM6Ly93d3cudHNsYW5nLmNuL2RvY3MvaGFuZGJvb2svZGVjb3JhdG9ycy5odG1s" title="https://www.tslang.cn/docs/handbook/decorators.html">装饰器组合<i class="fa fa-external-link"></i></span>原则，最外层的<code>@Component</code>被调用后对构造函数的修改会覆盖里层的<code>@Component</code>，最终生效的只是派生类的<code>@Component</code>中传入的参数。因此，如果需要改变<code>@Component</code>中的参数，则需要传入组件所需的全部参数。特别是<code>providers</code>中组件级的依赖，也是需要传入的，但第三方组件往往不会导出它的组件级依赖，就会给开发造成困难。而如果直接继承基类，像<code>DirectDerivedComponent</code>，该组件会继承<code>@Component</code>中所有的元参数和 BaseComponent 提供的类型与构造函数。但是因为不能自定义组件的元参数，导致这种使用方式受限很多。</p>
+<blockquote>
+<p>在 TypeScript 里，当多个装饰器应用在一个声明上时会进行如下步骤的操作：</p>
+<ol>
+<li>由上至下依次对装饰器表达式求值。</li>
+<li>求值的结果会被当作函数，由下至上依次调用。</li>
+</ol>
+</blockquote>
+<figure class="highlight ts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// BaseComponent 基类组件</span></span><br><span class="line"><span class="meta">@Component</span>(&#123;</span><br><span class="line">  selector: <span class="string">'app-base'</span>,</span><br><span class="line">  templateUrl: <span class="string">'./base.component.html'</span>,</span><br><span class="line">  styleUrls: [<span class="string">'./base.component.less'</span>],</span><br><span class="line">  providers: [BaseService]</span><br><span class="line">&#125;)</span><br><span class="line"><span class="keyword">export</span> <span class="keyword">class</span> BaseComponent &#123;</span><br><span class="line">  construct(baseService: BaseService) &#123;&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// DerivedComponent 派生类组件</span></span><br><span class="line"><span class="meta">@Component</span>(&#123;</span><br><span class="line">  selector: <span class="string">'app-derived'</span>,</span><br><span class="line">  templateUrl: <span class="string">'./derived.component.html'</span>,</span><br><span class="line">  styleUrls: [<span class="string">'./derived.component.less'</span>],</span><br><span class="line">  providers: [BaseService] <span class="comment">// 装饰器中的元参数会覆盖基类组件，因此需要重新提供 providers</span></span><br><span class="line">&#125;)</span><br><span class="line"><span class="keyword">export</span> <span class="keyword">class</span> DerivedComponent <span class="keyword">extends</span> BaseComponent &#123;&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// DirectDerivedComponent 直接继承的派生类组件</span></span><br><span class="line"><span class="keyword">export</span> <span class="keyword">class</span> DirectDerivedComponent <span class="keyword">extends</span> BaseComponent &#123;&#125;</span><br></pre></td></tr></table></figure>
+<p>以上分析说明，在 Angular 中使用继承的方式开发组件是一件受限很多且复杂的事情。而且 Angular 官方也没有提供关于组件继承相关的文档。只能从源码分析猜测组件继承的机制。因此，所有这些其实只是想说明一件事：<strong>尽量避免使用组件继承</strong>。如果你足够细心，会发现在 Angular 在<span class="exturl" data-url="aHR0cHM6Ly9hbmd1bGFyLmNuL2d1aWRlL2RlcGVuZGVuY3ktaW5qZWN0aW9uLWluLWFjdGlvbiNpbmplY3QtaW50by1hLWRlcml2ZWQtY2xhc3M=" title="https://angular.cn/guide/dependency-injection-in-action#inject-into-a-derived-class">DI 实战<i class="fa fa-external-link"></i></span>一节有此说明。（不仅 Angular, React 官方也强调<span class="exturl" data-url="aHR0cHM6Ly96aC1oYW5zLnJlYWN0anMub3JnL2RvY3MvY29tcG9zaXRpb24tdnMtaW5oZXJpdGFuY2UuaHRtbA==" title="https://zh-hans.reactjs.org/docs/composition-vs-inheritance.html">避免使用组件继承<i class="fa fa-external-link"></i></span>。）当然也不是完全不能使用，<strong>当组件遵循第三方组件的大多数交互逻辑只是在视图层有所区别时，才建议考虑使用继承的方式实现。</strong></p>
+<p><em>想了解更多关于组件继承，<span class="exturl" data-url="aHR0cHM6Ly9zZWdtZW50ZmF1bHQuY29tL2EvMTE5MDAwMDAwODk3Njk5Ng==" title="https://segmentfault.com/a/1190000008976996">这篇文章<i class="fa fa-external-link"></i></span>可能会有帮助。</em></p>
+<h3 id="引入第三方组件"><a href="#引入第三方组件" class="headerlink" title="引入第三方组件"></a>引入第三方组件</h3><p>如果你确定引入第三方组件，此时很容易忽略的一个问题就是第三方组件的 npm 包依赖问题。请选择第三方组件一个合适版本引入，确保兼容公司组件库的核心依赖库。</p>
+<p>另外值得说明的是，在开发库的过程中，请在组件库根目录的 package.json 中的 <code>devDependencies</code> 中安装所有的同级依赖。而在目标库的 package.json 中使用 <code>peerDependencies</code> 说明同级依赖。关于为何这样做的原因可以参考 Angular 文档<span class="exturl" data-url="aHR0cHM6Ly9hbmd1bGFyLmNuL2d1aWRlL2NyZWF0aW5nLWxpYnJhcmllcyN1c2UtdHlwZXNjcmlwdC1wYXRoLW1hcHBpbmctZm9yLXBlZXItZGVwZW5kZW5jaWVz" title="https://angular.cn/guide/creating-libraries#use-typescript-path-mapping-for-peer-dependencies">开发 Angualr 库<i class="fa fa-external-link"></i></span>与 ng-packagr 的文档<span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL25nLXBhY2thZ3IvbmctcGFja2Fnci9ibG9iL21hc3Rlci9kb2NzL2RlcGVuZGVuY2llcy5tZA==" title="https://github.com/ng-packagr/ng-packagr/blob/master/docs/dependencies.md">dependencies<i class="fa fa-external-link"></i></span>。</p>
+<h2 id="实现一个最小-demo"><a href="#实现一个最小-demo" class="headerlink" title="实现一个最小 demo"></a>实现一个最小 demo</h2><p>在一切准备就绪之后，先不要立刻投入组件具体功能的实现中。我建议第一步实现一个最小的 demo，实现最基本最重要的功能，确保我们的思路是可行的，相当于 POC。比如我在开发 table 组件的时候，第一版的设计是这样的。table 列是通过 jsx 语法来实现自定义的，列的 API 设计也依赖于此。如果你之前用 React 的话会觉得这看起来是非常自然的设计。</p>
+<figure class="highlight ts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Component</span>(&#123;</span><br><span class="line">  selector: <span class="string">'table-demo'</span>,</span><br><span class="line">  template: <span class="string">`</span></span><br><span class="line"><span class="string">    &lt;bx-table</span></span><br><span class="line"><span class="string">      [data]="data"</span></span><br><span class="line"><span class="string">      [columns]="columns"</span></span><br><span class="line"><span class="string">    &gt;&lt;/bx-table&gt;</span></span><br><span class="line"><span class="string">  `</span></span><br><span class="line">&#125;)</span><br><span class="line"><span class="keyword">export</span> <span class="keyword">class</span> TableDemo &#123;</span><br><span class="line">  <span class="comment">// 表格行配置</span></span><br><span class="line">  columns = [</span><br><span class="line">    &#123;</span><br><span class="line">      title: <span class="string">'姓名'</span>,</span><br><span class="line">      dataIndex: <span class="string">'name'</span>,</span><br><span class="line">      key: <span class="string">'name'</span></span><br><span class="line">    &#125;,</span><br><span class="line">    &#123;</span><br><span class="line">      title: <span class="string">'Action'</span>,</span><br><span class="line">      key: <span class="string">'action'</span>,</span><br><span class="line">      template: <span class="function">(<span class="params">value, record, index</span>) =&gt;</span></span><br><span class="line">        <span class="string">`&lt;a&gt;Action 一 &#123;&#123; record.name &#125;&#125;&lt;/a&gt;&lt;nz-divider nzType="vertical"&gt;&lt;/nz-divider&gt;&lt;a&gt;Delete&lt;/a&gt;`</span></span><br><span class="line">    &#125;</span><br><span class="line">  ];</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>然而 Angular 是不支持这种语法的，这是 React 的特性。导致我只能另寻他法。最终选择仿照 <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL25nLWFsYWluL2RlbG9u" title="https://github.com/ng-alain/delon">delon<i class="fa fa-external-link"></i></span> 实现自定义模板，然后重新改写 API。所以这个环节可以防止我们犯那些很严重的错误。往往我们第一次设计的 API 有诸多不合理之处，这是一个很好的机会进行调整，同时成功的 demo 也让我们有信心继续开发下去。</p>
+<h2 id="继续开发，逐步实现-issue-中的功能"><a href="#继续开发，逐步实现-issue-中的功能" class="headerlink" title="继续开发，逐步实现 issue 中的功能"></a>继续开发，逐步实现 issue 中的功能</h2><p>接下来就需要我们慢慢逐步地实现 issue 中所列的功能了，在这期间可能会遇到很多意想不到的困难导致开发需要延期，也可能会需要调整很多次 API 以及增删一些功能。我们是组件的设计者也是开发者同时也是使用者，我们应该对它有自己的想法，开发时不断和大家沟通，可以力排众议也可以虚怀若谷，对它负责到底。这会是一个比较漫长的过程。我们会像西西弗斯一样，不断踩坑爬坑，踩坑爬坑，踩坑爬坑。因为造轮子会比用轮子复杂许多，可能经常会碰到我们知识的边界，会比较痛苦。但是当你最痛苦的时候，就是你进步最快的时候（也是头发掉的最快的时候）。</p>
+<h3 id="tsconfig-json-中的路径映射"><a href="#tsconfig-json-中的路径映射" class="headerlink" title="tsconfig.json 中的路径映射"></a>tsconfig.json 中的路径映射</h3><p>在开发 angular 库的过程中，必然要进行打包(<code>ng build</code>)。由于 angular 默认的打包工具(<code>@angular-devkit/build-ng-packagr</code>)来自于ng-packagr，这里把我在使用<code>ng-packagr</code>时遇到的一个比较常见的坑和大家分享一下。</p>
+<p>我们经常需要用别名指代某个位置的文件，比如需要用<code>@component/*</code>指代<code>node_modules/component/dist/*</code>。像这样的路径映射 typescript 是通过 tsconfig.json 的<code>compilerOptions</code>中<code>baseUrl</code>与<code>paths</code>来支持的。在 Angular 项目中会使用 angular.json 中指定的 tsconfig 文件，而 VS Code 编辑器中会使用根目录下的 tsconfig.json 文件。因此有时会出现编辑器不能正确解析路径映射的情况，但是 angular 是可以正常构建的。（来源见<span class="exturl" data-url="aHR0cHM6Ly9zdGFja292ZXJmbG93LmNvbS9xdWVzdGlvbnMvNTIxNDcyMDEvYW5ndWxhci02LWRlY2xhcmUtcGF0aC1mb3ItbGlicmFyeS1pbi10c2NvbmZpZy1saWItanNvbg==" title="https://stackoverflow.com/questions/52147201/angular-6-declare-path-for-library-in-tsconfig-lib-json">这里<i class="fa fa-external-link"></i></span>）</p>
+<p>在开发库的时候，一般来说路径映射应该在主目录下的 <code>tsconfig.json</code>中配置，但有时候需要在库级别进行路径映射，也就是在 <code>tsconfig.lib.json</code>进行配置。这里值得注意的是，<code>paths</code>指向的路径必须是已编译的文件所在路径，而且除了目标本身，也需要对目标的子文件进行映射。例如同处于<code>projects</code>目录下的<code>lib-a</code>和<code>lib-b</code>，<code>lib-b</code>引入了<code>lib-a</code>，此时假如我们必须要在<code>lib-b</code>里进行路径映射，那么<code>lib-b/tsconfig.lib.json</code>需要配置大致如下。（关于此问题的讨论详见<span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL25nLXBhY2thZ3IvbmctcGFja2Fnci9pc3N1ZXMvMTM4OA==" title="https://github.com/ng-packagr/ng-packagr/issues/1388">这里<i class="fa fa-external-link"></i></span>）</p>
+<figure class="highlight json"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">&#123;</span><br><span class="line">  <span class="attr">"extends"</span>: <span class="string">"../../tsconfig.json"</span>,</span><br><span class="line">  <span class="attr">"compilerOptions"</span>: &#123;</span><br><span class="line">    <span class="attr">"baseUrl"</span>: <span class="string">"./"</span>,</span><br><span class="line">    <span class="attr">"paths"</span>: &#123;</span><br><span class="line">      <span class="attr">"lib-a"</span>: [<span class="string">"../../dist/lib-a"</span>],</span><br><span class="line">      <span class="attr">"lib-a/*"</span>: [<span class="string">"../../dist/lib-a/*"</span>]</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h2 id="开发终于结束了"><a href="#开发终于结束了" class="headerlink" title="开发终于结束了"></a>开发终于结束了</h2><p>经历一段时间辛苦的开发之后，组件终于可以投入使用了。在组件发布之前，请检查以下工作是否完成。</p>
+<ul>
+<li>对比 issue 中的设计，查看是否完成所有的功能以及 API 是否有变动。如果有和 issue 设计不一致的地方，向大家说明原因。当然，最好是在开发的时候就积极沟通，和同事达成一致。</li>
+<li>添加组件的 README，进行 API 说明。如果有必要的话，尽量补充使用范例。</li>
+<li>编辑<code>.gitignore</code>使其不再忽略相应的编译文件，提交编译文件。</li>
+</ul>
+<p>接下来只需要按照流程进行发布即可。</p>
+<ol>
+<li>发起 MR（如果在开发前已经发起了 WIP 状态的 MR，现在需要移除 WIP 标志）</li>
+<li>Code Review</li>
+<li>合并入主分支</li>
+<li>决定是否发布新版本<ul>
+<li>切出 release 分支，更新版本号</li>
+<li>使用 cheers 发布 beta 版本（默认会打上 tag）</li>
+<li>使用 demo 库测试 beta 版本，测试无误后合并入 master 分支，移除 release 分支</li>
+</ul>
+</li>
+</ol>
+<h3 id="工作流介绍"><a href="#工作流介绍" class="headerlink" title="工作流介绍"></a>工作流介绍</h3><p>我们的项目一般采用 gitflow 作为 git 工作流。它拥有两个长期分支 develop 与 master 和一些临时分支 feature分支、release 分支、hotfix 分支等。日常的开发在临时分支上进行，开发完毕后合并入 develop 分支，更新版本的时候通过 release 分支分别合并入 develop 分支和 master 分支。下图是 gitflow 的工作流图。(<em>了解更多移步<span class="exturl" data-url="aHR0cHM6Ly93d3cuYXRsYXNzaWFuLmNvbS9naXQvdHV0b3JpYWxzL2NvbXBhcmluZy13b3JrZmxvd3MvZ2l0Zmxvdy13b3JrZmxvdw==" title="https://www.atlassian.com/git/tutorials/comparing-workflows/gitflow-workflow">这里<i class="fa fa-external-link"></i></span>。</em>)</p>
+<p><img src="/images/gitflow" alt="gitflow"></p>
+<p>不过组件库项目开发一般采用github flow。github flow 与 gitflow 不同的是移除了 develop 分支，只需维护一个长期分支 master（实际上它更类似于 github flow，见下图）。因此组件功能的更新不需要经过合入 develop 分支与切换 release 分支等操作，直接合入主分支即可。等到变动积累到一定量，会在主分支切出 release 分支，修改版本号然后打上 tag 进行发布。如此设计原因在于 gitflow 的工作流使用 develop （或 release 分支）来进行测试环境的更新，master 来进行生产环境的更新，适合于业务开发。但是组件库不依赖于测试环境，因此也就无需 develop 分支。常见的开源项目一般都采用 github flow 的形式管理工作流。</p>
+<p><img src="/images/githubflow" alt="github flow"></p>
+<p><strong>至此所有的工作就都结束了，停下来歇一歇，总结一下开发过程中的收获，和同事们分享你的成长吧！</strong></p>
+<p>相关链接：<br><a href="https://s33h0w.me/2019/11/12/如何开发公司组件库-上/">如何开发公司组件库(上)</a></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tags/Angular/" rel="tag"><i class="fa fa-tag"></i> Angular</a>
+              <a href="/tags/前端/" rel="tag"><i class="fa fa-tag"></i> 前端</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-next post-nav-item">
+                <a href="/engnieering/如何开发公司组件库-上.html" rel="next" title="如何开发公司组件库(上)">
+                  <i class="fa fa-chevron-left"></i> 如何开发公司组件库(上)
+                </a>
+            </div>
+
+            <span class="post-nav-divider"></span>
+
+            <div class="post-nav-prev post-nav-item">
+                <a href="/refactoring/重构第二版思维导图.html" rel="prev" title="《重构（第二版）》思维导图">
+                  《重构（第二版）》思维导图 <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#创建开发环境"><span class="nav-number">1.</span> <span class="nav-text">创建开发环境</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#确定组件的开发方式"><span class="nav-number">2.</span> <span class="nav-text">确定组件的开发方式</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#中介者模式"><span class="nav-number">2.1.</span> <span class="nav-text">中介者模式</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#是否应该使用组件继承"><span class="nav-number">2.2.</span> <span class="nav-text">是否应该使用组件继承</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#引入第三方组件"><span class="nav-number">2.3.</span> <span class="nav-text">引入第三方组件</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#实现一个最小-demo"><span class="nav-number">3.</span> <span class="nav-text">实现一个最小 demo</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#继续开发，逐步实现-issue-中的功能"><span class="nav-number">4.</span> <span class="nav-text">继续开发，逐步实现 issue 中的功能</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#tsconfig-json-中的路径映射"><span class="nav-number">4.1.</span> <span class="nav-text">tsconfig.json 中的路径映射</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#开发终于结束了"><span class="nav-number">5.</span> <span class="nav-text">开发终于结束了</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#工作流介绍"><span class="nav-number">5.1.</span> <span class="nav-text">工作流介绍</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="s33h0w"
+      src="/images/s33h0w.png">
+  <p class="site-author-name" itemprop="name">s33h0w</p>
+  <div class="site-description" itemprop="description">In the final analysis it is between you and God. It was never between you and them anyway.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">18</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="feed-link motion-element">
+    <a href="/atom.xml" rel="alternate">
+      <i class="fa fa-rss"></i>RSS
+    </a>
+  </div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3MzM2gwdw==" title="GitHub → https://github.com/s33h0w"><i class="fa fa-fw fa-github"></i></span>
+      </span>
+      <span class="links-of-author-item">
+        <span class="exturl" data-url="aHR0cHM6Ly93d3cuZG91YmFuLmNvbS9wZW9wbGUvNTY0MDAyMTQ=" title="豆瓣 → https://www.douban.com/people/56400214"><i class="fa fa-fw fa-custom douban"></i></span>
+      </span>
+      <span class="links-of-author-item">
+        <span class="exturl" data-url="aHR0cHM6Ly93d3cuemhpaHUuY29tL3Blb3BsZS9zMzNoMHc=" title="知乎 → https://www.zhihu.com/people/s33h0w"><i class="fa fa-fw fa-custom zhihu"></i></span>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-crow"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder"><span class="exturl theme-link" data-url="aHR0cHM6Ly9naXRodWIuY29tL3MzM2gwdw==">s33h0w</span>
+  </span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script>
+<script src="/js/schemes/muse.js"></script>
+<script src="/js/next-boot.js"></script>
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  <script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID: '911aba6a2761f62d8739',
+      clientSecret: '7df6a704729a996fc519bea74e3615f585b49d1c',
+      repo: 's33h0w.github.io',
+      owner: 's33h0w',
+      admin: ['s33h0w'],
+      id: '50eec621320d024d39d0d619a38cff44',
+        language: 'zh-CN',
+      distractionFreeMode: 'true'
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+</script>
+
+</body>
+</html>

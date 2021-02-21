@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 3.9.0">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon.ico">
+  <link rel="alternate" href="/atom.xml" title="s33h0w" type="application/atom+xml">
+  <meta name="google-site-verification" content="8RSRHXGE7qa0lM0SZqS5rLk_KUrRzq-kcvjEgS9Bk7w">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Noto Sans SC:300,300italic,400,400italic,700,700italic|Fira Code:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '7.5.0',
+    exturl: true,
+    sidebar: {"position":"right","width":270,"display":"post","offset":12,"onmobile":false},
+    copycode: {"enable":true,"show_result":true,"style":"flat"},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="良好的目录结构对于应用的重要性不必多说，下面我们会通过三个问题逐步探讨它应该是怎样的。（太长不看的同学可以直接跳至总结看最后的目录。）注：这里的目录结构仅仅指的是app文件夹内的结构">
+<meta name="keywords" content="Angular,架构">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Angular项目如何组织一个良好的目录结构">
+<meta property="og:url" content="https://s33h0w.me/angular/Angular项目如何组织一个良好的目录结构.html">
+<meta property="og:site_name" content="s33h0w">
+<meta property="og:description" content="良好的目录结构对于应用的重要性不必多说，下面我们会通过三个问题逐步探讨它应该是怎样的。（太长不看的同学可以直接跳至总结看最后的目录。）注：这里的目录结构仅仅指的是app文件夹内的结构">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2020-08-30T03:12:17.159Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Angular项目如何组织一个良好的目录结构">
+<meta name="twitter:description" content="良好的目录结构对于应用的重要性不必多说，下面我们会通过三个问题逐步探讨它应该是怎样的。（太长不看的同学可以直接跳至总结看最后的目录。）注：这里的目录结构仅仅指的是app文件夹内的结构">
+
+<link rel="canonical" href="https://s33h0w.me/angular/Angular项目如何组织一个良好的目录结构.html">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>Angular项目如何组织一个良好的目录结构 | s33h0w</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="site-title">s33h0w</span>
+      </a>
+    </div>
+        <h1 class="site-subtitle" itemprop="description">be indie</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-crow"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="搜索..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://s33h0w.me/angular/Angular项目如何组织一个良好的目录结构.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/s33h0w.png">
+      <meta itemprop="name" content="s33h0w">
+      <meta itemprop="description" content="In the final analysis it is between you and God. It was never between you and them anyway.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="s33h0w">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          Angular项目如何组织一个良好的目录结构
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2019-11-16 16:05:49" itemprop="dateCreated datePublished" datetime="2019-11-16T16:05:49+08:00">2019-11-16</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>良好的目录结构对于应用的重要性不必多说，下面我们会通过三个问题逐步探讨它应该是怎样的。（太长不看的同学可以直接跳至总结看最后的目录。）<br><!-- markdownlint-disable MD036 --><br><em>注：这里的目录结构仅仅指的是app文件夹内的结构</em><br><!-- markdownlint-enable MD036 --><br><a id="more"></a></p>
+<h2 id="Q1-AppModule中引入的模块太多，需要修改某个应用层级的功能时经常找不到地方"><a href="#Q1-AppModule中引入的模块太多，需要修改某个应用层级的功能时经常找不到地方" class="headerlink" title="Q1: AppModule中引入的模块太多，需要修改某个应用层级的功能时经常找不到地方"></a>Q1: AppModule中引入的模块太多，需要修改某个应用层级的功能时经常找不到地方</h2><p><code>AppModule</code>是应用的根模块，我们应该将服务场景是全应用级的服务和模块添加到这里。因此根模块往往会承担许多功能，例如主题、认证、本地化、权限控制等等。</p>
+<p><span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL25nLWFsYWluL25nLWFsYWlu" title="https://github.com/ng-alain/ng-alain">ng-alain<i class="fa fa-external-link"></i></span>在国内的Angular项目中很常用，我们就以它为例，先来看一下ng-alain提供的脚手架中<code>AppModule</code>引入了哪些模块。</p>
+<figure class="highlight ts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// app.module.ts</span></span><br><span class="line"><span class="meta">@NgModule</span>(&#123;</span><br><span class="line">  declarations: [AppComponent],</span><br><span class="line">  imports: [</span><br><span class="line">    BrowserModule,              <span class="comment">// 应用基础设施模块</span></span><br><span class="line">    BrowserAnimationsModule,    <span class="comment">// 动画模块</span></span><br><span class="line">    HttpClientModule,           <span class="comment">// http模块</span></span><br><span class="line">    DelonModule.forRoot(),      <span class="comment">// ng-alain的核心第三方模块</span></span><br><span class="line">    CoreModule,                 <span class="comment">// 核心模块</span></span><br><span class="line">    SharedModule,               <span class="comment">// 共享模块</span></span><br><span class="line">    LayoutModule,               <span class="comment">// 布局模块</span></span><br><span class="line">    RoutesModule,               <span class="comment">// 路由模块</span></span><br><span class="line">    ...FORM_MODULES,            <span class="comment">// 自定义的表单模块</span></span><br><span class="line">    ...GLOBAL_THIRD_MODULES,    <span class="comment">// 可供拓展的全局第三方模块列表</span></span><br><span class="line">  ],</span><br><span class="line">  providers: [</span><br><span class="line">    ...LANG_PROVIDES,           <span class="comment">// 本地化服务</span></span><br><span class="line">    ...INTERCEPTOR_PROVIDES,    <span class="comment">// http拦截器服务</span></span><br><span class="line">    ...APPINIT_PROVIDES         <span class="comment">// app初始化服务</span></span><br><span class="line">  ],</span><br><span class="line">  bootstrap: [AppComponent],</span><br><span class="line">&#125;)</span><br><span class="line"><span class="keyword">export</span> <span class="keyword">class</span> AppModule &#123;&#125;</span><br></pre></td></tr></table></figure>
+<p>嗯，确实不少。除了Angular官方提供的常用模块外，还有核心模块和一些第三方模块等等。问题来了，我需要修改认证相关的功能，应该去哪里找？从<code>AppModule</code>中并没有发现直接的线索，有可能是在<code>CoreModule</code>中。这是<code>CoreModule</code>的代码。</p>
+<figure class="highlight ts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@NgModule</span>(&#123;</span><br><span class="line">  providers: [],</span><br><span class="line">&#125;)</span><br><span class="line"><span class="keyword">export</span> <span class="keyword">class</span> CoreModule &#123;</span><br><span class="line">  <span class="keyword">constructor</span>(<span class="params"><span class="meta">@Optional</span>() <span class="meta">@SkipSelf</span>() parentModule: CoreModule</span>) &#123;</span><br><span class="line">    throwIfAlreadyLoaded(parentModule, <span class="string">'CoreModule'</span>);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>看来我们猜错了，<code>CoreModule</code>中并没有输出任何服务提供给根模块。那有可能是那个核心的第三方模块<code>DelonModule</code>。这是<code>DelonModule</code>的代码。</p>
+<figure class="highlight ts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> GLOBAL_CONFIG_PROVIDES = [</span><br><span class="line">  &#123; provide: STConfig, useFactory: fnSTConfig &#125;,</span><br><span class="line">  &#123; provide: PageHeaderConfig, useFactory: fnPageHeaderConfig &#125;,</span><br><span class="line">  &#123; provide: DelonAuthConfig, useFactory: fnDelonAuthConfig &#125;,</span><br><span class="line">];</span><br><span class="line"></span><br><span class="line">...</span><br><span class="line"></span><br><span class="line"><span class="meta">@NgModule</span>(&#123;</span><br><span class="line">  imports: [AlainThemeModule.forRoot(), DelonACLModule.forRoot(), ...MOCK_MODULES],</span><br><span class="line">&#125;)</span><br><span class="line"><span class="keyword">export</span> <span class="keyword">class</span> DelonModule &#123;</span><br><span class="line">  <span class="keyword">static</span> forRoot(): ModuleWithProviders &#123;</span><br><span class="line">    <span class="keyword">return</span> &#123;</span><br><span class="line">      ngModule: DelonModule,</span><br><span class="line">      providers: [...REUSETAB_PROVIDES, ...GLOBAL_CONFIG_PROVIDES],</span><br><span class="line">    &#125;;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>DelonModule.forRoot()</code>会返回一个<code>ModuleWithProviders</code>对象，如同它名字的意义，它将模块和服务打包在一起。其中的<code>providers</code>中引入了<code>GLOBAL_CONFIG_PROVIDES</code>。这是个数组，在这里面我们找到了关于认证配置的服务提供商<code>DelonAuthConfig</code>。很幸运，我们尝试了两次就找到了。但如果你不仔细去看<code>GLOBAL_CONFIG_PROVIDES</code>里面都有什么的话，那你可能就错过了。</p>
+<p>无疑这样的寻找过程对于一个不了解delon的人是充满心智负担的，他可能很难找到认证服务相关代码写在哪里。如果在一开始我们就能从目录结构上明显的看到认证服务在哪里，那该多好呀！</p>
+<p>因此，我们有必要为<code>AppModule</code>减负，它承担了太多。</p>
+<p>俗话说，<strong>不是一家人，不进一家门。</strong> 如果AppModule中仅仅引入angular的自家人————<code>BrowserModule</code>、<code>HttpClientModule</code>等模块用于基础功能服务，而将其他拓展功能交由<code>CoreModule</code>来负责（这也是<code>CoreModule</code>设计的初衷），岂不美哉？</p>
+<p>现在我们就来试一下这种模块组织方式。</p>
+<p>将<code>AppModule</code>中第三方提供的功能服务全部移交给<code>CoreModule</code>，仅仅保留angular自家人。</p>
+<figure class="highlight ts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// app.module.ts</span></span><br><span class="line"><span class="meta">@NgModule</span>(&#123;</span><br><span class="line">  declarations: [AppComponent],</span><br><span class="line">  imports: [</span><br><span class="line">    BrowserModule,</span><br><span class="line">    BrowserAnimationsModule,</span><br><span class="line">    HttpClientModule,</span><br><span class="line">    RouteRoutingModule,</span><br><span class="line">    CoreModule.forRoot()],</span><br><span class="line">  providers: [],</span><br><span class="line">  bootstrap: [AppComponent],</span><br><span class="line">&#125;)</span><br><span class="line"><span class="keyword">export</span> <span class="keyword">class</span> AppModule &#123;&#125;</span><br></pre></td></tr></table></figure>
+<p><code>AppModule</code>清爽多了！同时我们拥有了一个强大的<code>CoreModule</code>，它提供了一些第三方的应用级服务。</p>
+<figure class="highlight ts"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// core.module.ts</span></span><br><span class="line"><span class="meta">@NgModule</span>(&#123;</span><br><span class="line">  imports: [</span><br><span class="line">    AlainThemeModule.forRoot(),     <span class="comment">// 主题模块</span></span><br><span class="line">    DelonACLModule.forRoot()        <span class="comment">// 权限控制模块</span></span><br><span class="line">  ],</span><br><span class="line">&#125;)</span><br><span class="line"><span class="keyword">export</span> <span class="keyword">class</span> CoreModule &#123;</span><br><span class="line">  <span class="keyword">static</span> forRoot(): ModuleWithProviders &#123;</span><br><span class="line">    <span class="keyword">return</span> &#123;</span><br><span class="line">      ngModule: CoreModule,</span><br><span class="line">      providers: [</span><br><span class="line">        ...INTERCEPTOR_PROVIDES,    <span class="comment">// http拦截服务</span></span><br><span class="line">        ...LANG_PROVIDES,           <span class="comment">// 本地化服务</span></span><br><span class="line">        ...APPINIT_PROVIDES,        <span class="comment">// 应用初始化服务</span></span><br><span class="line">        ...ABC_CONFIG_PROVIDES,     <span class="comment">// @delon/abc 组件配置服务</span></span><br><span class="line">        ...REUSETAB_PROVIDES,       <span class="comment">// delon 路由复用服务</span></span><br><span class="line">        ...AUTH_CONFIG_PROVIDES,    <span class="comment">// 认证服务</span></span><br><span class="line">      ],</span><br><span class="line">    &#125;;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>然后我们将<code>CoreModule</code>和它的服务提供商们，都放进一个core目录下。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">├── core                                <span class="comment"># 核心模块</span></span><br><span class="line">    ├── abc-config.provides.ts          <span class="comment"># @bixi/abc的全局配置服务提供商</span></span><br><span class="line">    ├── app-initializer.provides.ts     <span class="comment"># App 初始化服务提供商</span></span><br><span class="line">    ├── auth.provides.ts                <span class="comment"># 认证服务提供商</span></span><br><span class="line">    ├── core.module.ts                  <span class="comment"># 核心模块文件</span></span><br><span class="line">    ├── http-interceptor.provides.ts    <span class="comment"># http 拦截器服务提供商</span></span><br><span class="line">    ├── locale.provides.ts              <span class="comment"># 本地化服务提供商</span></span><br><span class="line">    └── reusetab.provides.ts            <span class="comment"># 路由服用服务提供商</span></span><br></pre></td></tr></table></figure>
+<p>嗯，看起来好多了。现在我们想要找到认证服务等等，就会直接去core目录下，简直是一目了然。</p>
+<h2 id="Q2-某个业务相关的需求变动时，经常需要改动几个不同目录下的代码"><a href="#Q2-某个业务相关的需求变动时，经常需要改动几个不同目录下的代码" class="headerlink" title="Q2: 某个业务相关的需求变动时，经常需要改动几个不同目录下的代码"></a>Q2: 某个业务相关的需求变动时，经常需要改动几个不同目录下的代码</h2><p>业务是复杂多变的，一个业务往往会涉及到多个模块、组件、服务等等。</p>
+<p>以下用一个常见的用户登录注册场景为例，假如用户登录后需要展示用户的一些个人信息（头像、昵称等等）。于是我们在passport中添加了一个user-profile组件用于展示用户信息，以及一个user-profile.service.ts用于提供user-profile用到的相关服务。与此同时，user路由下还有一个单独的detail页面用于展示用户详情，因此在user目录下我们引入了user.service.ts。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">├── routes</span><br><span class="line">    ├── passport</span><br><span class="line">        ├── login</span><br><span class="line">        ├── user-profile</span><br><span class="line">            ├── user-profile.component.ts</span><br><span class="line">        ├── passport-routing.module.ts</span><br><span class="line">        ├── passport.service.ts</span><br><span class="line">        ├── user-profile.service.ts</span><br><span class="line">        └── passport.module.ts</span><br><span class="line">    ├── user</span><br><span class="line">        ├── detail</span><br><span class="line">        ├── user.service.ts</span><br><span class="line">        ├── user-routing.module.ts</span><br><span class="line">        └── user.module.ts</span><br></pre></td></tr></table></figure>
+<p>那么问题来了，user-profile.service.ts和user.service.ts显然都和用户相关。如果用户相关的业务发生了改动，我们就需要检查两个目录下的服务，看看是否会收到影响。更糟糕的是，甚至可能有其它的目录下也包含了用户相关的一些服务，而你并没有发现它！看来，我们需要加个班了，挨个点开每个目录，小心翼翼地检查它们有没有包含用户服务，然后改动它们。</p>
+<p>没有人想加班，至少我们不想。有没有更好的办法解决这个问题？</p>
+<p>看看user-profile.service.ts和user.service.ts，它们都是和用户相关的服务，它们的关系是那么亲密，只是被无情地分到了不同的目录下了。所以我们决定，<strong>相爱的人就让他们在一起！</strong></p>
+<p>将user相关的组件和服务全部移至user目录下。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">├── routes</span><br><span class="line">    ├── passport</span><br><span class="line">        ├── login</span><br><span class="line">        ├── passport-routing.module.ts</span><br><span class="line">        ├── passport.service.ts</span><br><span class="line">        └── passport.module.ts</span><br><span class="line">    ├── user</span><br><span class="line">        ├── detail</span><br><span class="line">        ├── user-profile</span><br><span class="line">            ├── user-profile.component.ts</span><br><span class="line">            ├── user-profile.module.ts</span><br><span class="line">        ├── user.service.ts</span><br><span class="line">        ├── user-routing.module.ts</span><br><span class="line">        └── user.module.ts</span><br></pre></td></tr></table></figure>
+<p>现在和user相关的代码都放入了同一个目录下，如果用户相关业务发生了变动，我们只需要在这里修改代码。至于passport想要使用user-profile这个组件，只需要引入<code>UserModule</code>即可。愿天下有情人终成眷属，故事到此圆满结束了————吗？</p>
+<p>在<code>PassportModule</code>中引入<code>UserModule</code>？且不说仅仅是为了用一个小小的user-profile组件就引入了整个user模块，更关键的是：<code>PassportModule</code>和<code>UserModule</code>都是被懒加载的带路由模块啊！如果这样引用的话，那么在passport的路由下，不仅会加载<code>PassportModule</code>，也会加载<code>UserModule</code>，这显然是不合理的。</p>
+<p>这种情况很棘手，我们可以把它归纳为：一个带路由模块复用了另一个带路由模块中的一些部件（比如组件、服务、管道等等）。往常我们只需要在<code>imports</code>属性中添加那个模块即可，但对于带路由模块来说行不通了。</p>
+<p>其实这种情形可以类比我们熟悉的组件复用方式：如果两个不同的组件复用了某部分相同的构造，我们可以将这部分构造提取形成一个较小的组件，即可被复用。同样的，对于模块之间部分构造的复用，我们也把它提取出来，用<code>NgModule</code>模块化，然后引入这个模块即可。(多说一句，对于react来说，一切都是组件。但在angular的世界里，一切都是模块。)</p>
+<p>因此，你会看到在刚才的目录结构中，我添加了user-profile.module.ts这个文件。对于passport来说，它只需要引入<code>UserProfileModule</code>即可使用user-profile组件。</p>
+<h2 id="Q3-SharedModule中导出了太多的东西，可我只需要一小部分就够了"><a href="#Q3-SharedModule中导出了太多的东西，可我只需要一小部分就够了" class="headerlink" title="Q3: SharedModule中导出了太多的东西，可我只需要一小部分就够了"></a>Q3: SharedModule中导出了太多的东西，可我只需要一小部分就够了</h2><p>通常应用中都会有一个shared目录，它拥有一个<code>SharedModule</code>。我们会将那些可能会在应用中到处使用的组件、指令和管道统统放入<code>SharedModule</code>中。而我见到过一种特别常见的实践就是：将一切被复用的东西都扔进了<code>SharedModule</code>中，理由很简单：因为它们被”shared”。因此就形成了一个巨大的<code>SharedModule</code>，它容纳了许多引入<code>SharedModule</code>的模块做梦也想不到的东西。</p>
+<p>然而我们的模块并不如此多情。相较于<strong>我全都要！</strong>, 它们更喜欢<strong>弱水三千，只取一瓢饮。</strong></p>
+<p>如果仔细看看shared目录下的那些东西，有相当一部分是带有各种各样的前缀的。这时候我们就应该反思一下自己，是不是又拆散了“有情人”。前缀往往意味着文件需要一个更合适它们的地方，别忘了我们刚才说的，<strong>相爱的人就让他们在一起</strong>。</p>
+<p>这样做之后，shared目录里剩下的东西一般会有这样的特征：所有的带路由模块<strong>都可能</strong>需要、不和具体的业务关联、很少有服务。因此，共享模块中的“共享”其实指的是和所有人共享，而不是仅仅属于某些人。</p>
+<h2 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h2><p>通过这三个问题的解答，一个良好的目录结构在我们面前逐渐清晰。</p>
+<figure class="highlight bash"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">├── app</span><br><span class="line">    ├── core                                <span class="comment"># 核心模块</span></span><br><span class="line">    ├── passport                            <span class="comment"># 登录注册模块</span></span><br><span class="line">    ├── user                                <span class="comment"># 用户模块</span></span><br><span class="line">    ├── layout                              <span class="comment"># 布局模块</span></span><br><span class="line">    ├── shared                              <span class="comment"># 共享模块</span></span><br><span class="line">    ├── app-routing.module.ts               <span class="comment"># 根应用路由模块</span></span><br><span class="line">    ├── app.component.ts                    <span class="comment"># 根组件</span></span><br><span class="line">    └── app.module.ts                       <span class="comment"># App 引导模块</span></span><br></pre></td></tr></table></figure>
+<p>在这里我移除了routes这一目录层级，这让应用看起更扁平，对我们定位代码是有好处的。如果你的路由特别特别多，可以再考虑加上routes这层目录。</p>
+<p>至此，我们的目录结构就完整了。它清晰优美，让人不忍心破坏它的简洁。值得多说一句的是，像<code>PassportModule</code>、<code>UserModule</code>这样的带路由模块，我更愿意称它们为领域模块。因为它们代表的是一个业务领域，路由只是它的其中之一的特性。所以我们的应用结构也可以理解为这样：核心模块、业务领域模块、布局模块、共享模块。</p>
+<p>现在，我们已经知道了如何组织良好的目录结构。重新审视我们的代码，看看是否会出现上述的三个问题，把它们放到更合理的位置吧！</p>
+<p>参考：</p>
+<blockquote>
+<p><span class="exturl" data-url="aHR0cHM6Ly9hbmd1bGFyLmNuL2d1aWRlL3N0eWxlZ3VpZGUjYXBwbGljYXRpb24tc3RydWN0dXJlLWFuZC1uZ21vZHVsZXM=" title="https://angular.cn/guide/styleguide#application-structure-and-ngmodules">应用程序结构与 NgModule<i class="fa fa-external-link"></i></span><br><span class="exturl" data-url="aHR0cHM6Ly9hbmd1bGFyLmNuL2d1aWRlL21vZHVsZS10eXBlcw==" title="https://angular.cn/guide/module-types">特性模块的分类<i class="fa fa-external-link"></i></span><br><span class="exturl" data-url="aHR0cHM6Ly9uZy1hbGFpbi5jb20vZG9jcy9tb2R1bGUvemg=" title="https://ng-alain.com/docs/module/zh">ng-alain模块注册指导原则<i class="fa fa-external-link"></i></span><br><span class="exturl" data-url="aHR0cHM6Ly9tZWRpdW0uY29tL0Btb3Rjb3dsZXkvYW5ndWxhci1mb2xkZXItc3RydWN0dXJlLWQxODA5YmU5NTU0Mg==" title="https://medium.com/@motcowley/angular-folder-structure-d1809be95542">Angular Folder Structure<i class="fa fa-external-link"></i></span><br><span class="exturl" data-url="aHR0cHM6Ly9pdG5leHQuaW8vY2hvb3NpbmctYS1oaWdobHktc2NhbGFibGUtZm9sZGVyLXN0cnVjdHVyZS1pbi1hbmd1bGFyLWQ5ODdkZTY1ZWM3" title="https://itnext.io/choosing-a-highly-scalable-folder-structure-in-angular-d987de65ec7">How to define a highly scalable folder structure for your Angular project<i class="fa fa-external-link"></i></span></p>
+</blockquote>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tags/Angular/" rel="tag"><i class="fa fa-tag"></i> Angular</a>
+              <a href="/tags/架构/" rel="tag"><i class="fa fa-tag"></i> 架构</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-next post-nav-item">
+                <a href="/refactoring/重构第二版思维导图.html" rel="next" title="《重构（第二版）》思维导图">
+                  <i class="fa fa-chevron-left"></i> 《重构（第二版）》思维导图
+                </a>
+            </div>
+
+            <span class="post-nav-divider"></span>
+
+            <div class="post-nav-prev post-nav-item">
+                <a href="/angular/从ControlValueAccessor说起——源码分析Angular表单的实现-上.html" rel="prev" title="从ControlValueAccessor说起——源码分析Angular表单的实现(上)">
+                  从ControlValueAccessor说起——源码分析Angular表单的实现(上) <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Q1-AppModule中引入的模块太多，需要修改某个应用层级的功能时经常找不到地方"><span class="nav-number">1.</span> <span class="nav-text">Q1: AppModule中引入的模块太多，需要修改某个应用层级的功能时经常找不到地方</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Q2-某个业务相关的需求变动时，经常需要改动几个不同目录下的代码"><span class="nav-number">2.</span> <span class="nav-text">Q2: 某个业务相关的需求变动时，经常需要改动几个不同目录下的代码</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Q3-SharedModule中导出了太多的东西，可我只需要一小部分就够了"><span class="nav-number">3.</span> <span class="nav-text">Q3: SharedModule中导出了太多的东西，可我只需要一小部分就够了</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结"><span class="nav-number">4.</span> <span class="nav-text">总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="s33h0w"
+      src="/images/s33h0w.png">
+  <p class="site-author-name" itemprop="name">s33h0w</p>
+  <div class="site-description" itemprop="description">In the final analysis it is between you and God. It was never between you and them anyway.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">18</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="feed-link motion-element">
+    <a href="/atom.xml" rel="alternate">
+      <i class="fa fa-rss"></i>RSS
+    </a>
+  </div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3MzM2gwdw==" title="GitHub → https://github.com/s33h0w"><i class="fa fa-fw fa-github"></i></span>
+      </span>
+      <span class="links-of-author-item">
+        <span class="exturl" data-url="aHR0cHM6Ly93d3cuZG91YmFuLmNvbS9wZW9wbGUvNTY0MDAyMTQ=" title="豆瓣 → https://www.douban.com/people/56400214"><i class="fa fa-fw fa-custom douban"></i></span>
+      </span>
+      <span class="links-of-author-item">
+        <span class="exturl" data-url="aHR0cHM6Ly93d3cuemhpaHUuY29tL3Blb3BsZS9zMzNoMHc=" title="知乎 → https://www.zhihu.com/people/s33h0w"><i class="fa fa-fw fa-custom zhihu"></i></span>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-crow"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder"><span class="exturl theme-link" data-url="aHR0cHM6Ly9naXRodWIuY29tL3MzM2gwdw==">s33h0w</span>
+  </span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script>
+<script src="/js/schemes/muse.js"></script>
+<script src="/js/next-boot.js"></script>
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  <script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID: '911aba6a2761f62d8739',
+      clientSecret: '7df6a704729a996fc519bea74e3615f585b49d1c',
+      repo: 's33h0w.github.io',
+      owner: 's33h0w',
+      admin: ['s33h0w'],
+      id: '58d5e9a3d282f72949f5a5c8b588b43c',
+        language: 'zh-CN',
+      distractionFreeMode: 'true'
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+</script>
+
+</body>
+</html>

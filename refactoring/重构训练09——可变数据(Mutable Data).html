@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 3.9.0">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon.ico">
+  <link rel="alternate" href="/atom.xml" title="s33h0w" type="application/atom+xml">
+  <meta name="google-site-verification" content="8RSRHXGE7qa0lM0SZqS5rLk_KUrRzq-kcvjEgS9Bk7w">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Noto Sans SC:300,300italic,400,400italic,700,700italic|Fira Code:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '7.5.0',
+    exturl: true,
+    sidebar: {"position":"right","width":270,"display":"post","offset":12,"onmobile":false},
+    copycode: {"enable":true,"show_result":true,"style":"flat"},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="可变数据是一种非常常见，但是不易捕捉的坏味道。这里分成三种常见类型进行讨论。">
+<meta name="keywords" content="重构">
+<meta property="og:type" content="article">
+<meta property="og:title" content="重构训练09——可变数据(Mutable-Data)">
+<meta property="og:url" content="https://s33h0w.me/refactoring/重构训练09——可变数据(Mutable Data).html">
+<meta property="og:site_name" content="s33h0w">
+<meta property="og:description" content="可变数据是一种非常常见，但是不易捕捉的坏味道。这里分成三种常见类型进行讨论。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2020-08-30T02:59:50.285Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="重构训练09——可变数据(Mutable-Data)">
+<meta name="twitter:description" content="可变数据是一种非常常见，但是不易捕捉的坏味道。这里分成三种常见类型进行讨论。">
+
+<link rel="canonical" href="https://s33h0w.me/refactoring/重构训练09——可变数据(Mutable Data).html">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>重构训练09——可变数据(Mutable-Data) | s33h0w</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="site-title">s33h0w</span>
+      </a>
+    </div>
+        <h1 class="site-subtitle" itemprop="description">be indie</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-crow"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="搜索..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://s33h0w.me/refactoring/重构训练09——可变数据(Mutable Data).html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/s33h0w.png">
+      <meta itemprop="name" content="s33h0w">
+      <meta itemprop="description" content="In the final analysis it is between you and God. It was never between you and them anyway.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="s33h0w">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          重构训练09——可变数据(Mutable-Data)
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-08-30 23:23:23" itemprop="dateCreated datePublished" datetime="2020-08-30T23:23:23+08:00">2020-08-30</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>可变数据是一种非常常见，但是不易捕捉的坏味道。这里分成三种常见类型进行讨论。<br><a id="more"></a></p>
+<h2 id="Case-1"><a href="#Case-1" class="headerlink" title="Case 1"></a>Case 1</h2><h3 id="Problem"><a href="#Problem" class="headerlink" title="Problem"></a>Problem</h3><figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> initialMonths = [<span class="string">"Jan"</span>, <span class="string">"March"</span>, <span class="string">"April"</span>, <span class="string">"June"</span>];</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">getCompletedMonths</span>(<span class="params">months: <span class="built_in">string</span>[]</span>): <span class="title">string</span> </span>&#123;</span><br><span class="line">  months.splice(<span class="number">1</span>, <span class="number">0</span>, <span class="string">"Feb"</span>);</span><br><span class="line">  <span class="keyword">return</span> months;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(getCompletedMonths(initialMonths));</span><br><span class="line"><span class="comment">// ["Jan", "Feb", "March", "April", "June"]</span></span><br></pre></td></tr></table></figure>
+<h3 id="Solution"><a href="#Solution" class="headerlink" title="Solution"></a>Solution</h3><figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">const</span> initialMonths = [<span class="string">"Jan"</span>, <span class="string">"March"</span>, <span class="string">"April"</span>, <span class="string">"June"</span>];</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">getCompletedMonths</span>(<span class="params">months: <span class="built_in">string</span>[]</span>): <span class="title">string</span> </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> [...months].splice(<span class="number">1</span>, <span class="number">0</span>, <span class="string">"Feb"</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="built_in">console</span>.log(getCompletedMonths(initialMonths));</span><br><span class="line"><span class="comment">// ["Jan", "Feb", "March", "April", "June"]</span></span><br></pre></td></tr></table></figure>
+<p>总结</p>
+<p>”任何有返回值的函数，都不应该有看得到的副作用“，比如改变函数的参数。如果需要更新一个数据结构，就返回一份新的数据副本，旧的数据仍保持不变。</p>
+<h2 id="Case-2"><a href="#Case-2" class="headerlink" title="Case 2"></a>Case 2</h2><h3 id="Problem-1"><a href="#Problem-1" class="headerlink" title="Problem"></a>Problem</h3><figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Sound the alarm and send a request to call the police.</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">setOffAlarms</span>(<span class="params"></span>) </span>&#123;&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">alertForMiscreant</span>(<span class="params">people: <span class="built_in">string</span></span>): <span class="title">void</span> </span>&#123;</span><br><span class="line">  <span class="keyword">const</span> miscreant = people.find(</span><br><span class="line">    (p) =&gt; p === <span class="string">"Michael"</span> || p === <span class="string">"Trevor"</span> || p === <span class="string">"Franklin"</span></span><br><span class="line">  );</span><br><span class="line">  <span class="keyword">if</span> (miscreant) &#123;</span><br><span class="line">    setOffAlarms();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="Solution-1"><a href="#Solution-1" class="headerlink" title="Solution"></a>Solution</h3><figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// Sound the alarm and send a request to call the police.</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">setOffAlarms</span>(<span class="params"></span>) </span>&#123;&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">findMiscreant</span>(<span class="params">people: <span class="built_in">string</span>[]</span>): <span class="title">string</span> | <span class="title">undefined</span> </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> people.find(</span><br><span class="line">    (p) =&gt; p === <span class="string">"Michael"</span> || p === <span class="string">"Trevor"</span> || p === <span class="string">"Franklin"</span></span><br><span class="line">  );</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">alertForMiscreant</span>(<span class="params">people: <span class="built_in">string</span>[]</span>): <span class="title">void</span> </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (findMiscreant(people)) &#123;</span><br><span class="line">    setOffAlarms();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>”如果函数仅仅是提供一个值，没有任何看得到的副作用，那么这是一个很有价值的东西。“ 尽可能从带有副作用的函数中将查询动作分离，使它更有价值，使用<strong>将查询函数和修改函数分离（Separate Query from Modifier）</strong>。</p>
+<h2 id="Case-3"><a href="#Case-3" class="headerlink" title="Case 3"></a>Case 3</h2><h3 id="Problem-2"><a href="#Problem-2" class="headerlink" title="Problem"></a>Problem</h3><p><span class="exturl" data-url="aHR0cHM6Ly9zdGFja2JsaXR6LmNvbS9lZGl0L3JlZmFjdG9yaW5nLW11dGFibGUtZGF0YT9maWxlPWluZGV4LnRzeA==" title="https://stackblitz.com/edit/refactoring-mutable-data?file=index.tsx">Online Demo<i class="fa fa-external-link"></i></span></p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">type</span> Option = &#123;</span><br><span class="line">  label: <span class="built_in">string</span>;</span><br><span class="line">  value: <span class="built_in">string</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">MutiCheck</span>(<span class="params">props:&#123;options: Option[]&#125;</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">const</span> &#123;options&#125; = props;</span><br><span class="line">  <span class="keyword">const</span> [selectAll, setSelectAll] = useState(<span class="literal">false</span>);</span><br><span class="line">  <span class="keyword">const</span> [selected, setSelected] = useState&lt;Option[]&gt;([]);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">const</span> handleChange = (option: Option, checked: <span class="built_in">boolean</span>): <span class="function"><span class="params">void</span> =&gt;</span> &#123;</span><br><span class="line">    <span class="keyword">const</span> currentSelected = <span class="keyword">new</span> Set(selected);</span><br><span class="line">    <span class="keyword">if</span>(checked) &#123;</span><br><span class="line">      currentSelected.add(option)</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      currentSelected.delete(option)</span><br><span class="line">    &#125;</span><br><span class="line">    setSelected(<span class="built_in">Array</span>.from(currentSelected));</span><br><span class="line">    setSelectAll(options.every(<span class="function"><span class="params">o</span> =&gt;</span> currentSelected.has(o)));</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> (</span><br><span class="line">    &lt;div&gt;</span><br><span class="line">      &lt;input <span class="keyword">type</span>=<span class="string">"checkbox"</span> checked=&#123;selectAll&#125; readOnly/&gt; Select All</span><br><span class="line">      &#123;options.map(<span class="function"><span class="params">o</span> =&gt;</span> (</span><br><span class="line">        &lt;label key=&#123;o.value&#125;&gt;</span><br><span class="line">          &lt;input <span class="keyword">type</span>=<span class="string">"checkbox"</span> value=&#123;o.value&#125; onChange=&#123;<span class="function"><span class="params">e</span> =&gt;</span> handleChange(o,e.target.checked)&#125;/&gt;&#123;o.label&#125;</span><br><span class="line">        &lt;<span class="regexp">/label&gt;</span></span><br><span class="line"><span class="regexp">      ))&#125;</span></span><br><span class="line"><span class="regexp">    &lt;/</span>div&gt;</span><br><span class="line">  );</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="Solution-2"><a href="#Solution-2" class="headerlink" title="Solution"></a>Solution</h3><figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">MutiCheck</span>(<span class="params">props:&#123;options: Option[]&#125;</span>) </span>&#123;</span><br><span class="line">  <span class="keyword">const</span> &#123;options&#125; = props;</span><br><span class="line">  <span class="keyword">const</span> [selected, setSelected] = useState&lt;Option[]&gt;([]);</span><br><span class="line"></span><br><span class="line">  <span class="keyword">const</span> handleChange = (option: Option, checked: <span class="built_in">boolean</span>): <span class="function"><span class="params">void</span> =&gt;</span> &#123;</span><br><span class="line">    <span class="keyword">const</span> currentSelected = <span class="keyword">new</span> Set(selected);</span><br><span class="line">    <span class="keyword">if</span>(checked) &#123;</span><br><span class="line">      currentSelected.add(option)</span><br><span class="line">    &#125; <span class="keyword">else</span> &#123;</span><br><span class="line">      currentSelected.delete(option)</span><br><span class="line">    &#125;</span><br><span class="line">    setSelected(<span class="built_in">Array</span>.from(currentSelected));</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">const</span> isSelectAll = <span class="function"><span class="params">()</span> =&gt;</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> options.every(<span class="function"><span class="params">opt</span> =&gt;</span> <span class="keyword">new</span> Set(selected).has(opt))</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="总结-1"><a href="#总结-1" class="headerlink" title="总结"></a>总结</h3><p>如果可变数据的值能在其他地方计算出来（比如<code>selectAll</code>），这就是一个特别刺鼻的坏味道。消除这种坏味道的办法很简单，使用<strong>以查询取代派生变量（Replace Derived Variable with Query）</strong>。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tags/重构/" rel="tag"><i class="fa fa-tag"></i> 重构</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-next post-nav-item">
+                <a href="/refactoring/重构训练08——神秘命名(Mysterious Name).html" rel="next" title="重构训练08——神秘命名(Mysterious-Name)">
+                  <i class="fa fa-chevron-left"></i> 重构训练08——神秘命名(Mysterious-Name)
+                </a>
+            </div>
+
+            <span class="post-nav-divider"></span>
+
+            <div class="post-nav-prev post-nav-item">
+                <a href="/refactoring/重构训练10——注释(Comments).html" rel="prev" title="重构训练10——注释(Comments)">
+                  重构训练10——注释(Comments) <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#Case-1"><span class="nav-number">1.</span> <span class="nav-text">Case 1</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Problem"><span class="nav-number">1.1.</span> <span class="nav-text">Problem</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Solution"><span class="nav-number">1.2.</span> <span class="nav-text">Solution</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Case-2"><span class="nav-number">2.</span> <span class="nav-text">Case 2</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Problem-1"><span class="nav-number">2.1.</span> <span class="nav-text">Problem</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Solution-1"><span class="nav-number">2.2.</span> <span class="nav-text">Solution</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#总结"><span class="nav-number">2.3.</span> <span class="nav-text">总结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Case-3"><span class="nav-number">3.</span> <span class="nav-text">Case 3</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Problem-2"><span class="nav-number">3.1.</span> <span class="nav-text">Problem</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Solution-2"><span class="nav-number">3.2.</span> <span class="nav-text">Solution</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#总结-1"><span class="nav-number">3.3.</span> <span class="nav-text">总结</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="s33h0w"
+      src="/images/s33h0w.png">
+  <p class="site-author-name" itemprop="name">s33h0w</p>
+  <div class="site-description" itemprop="description">In the final analysis it is between you and God. It was never between you and them anyway.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">18</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="feed-link motion-element">
+    <a href="/atom.xml" rel="alternate">
+      <i class="fa fa-rss"></i>RSS
+    </a>
+  </div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3MzM2gwdw==" title="GitHub → https://github.com/s33h0w"><i class="fa fa-fw fa-github"></i></span>
+      </span>
+      <span class="links-of-author-item">
+        <span class="exturl" data-url="aHR0cHM6Ly93d3cuZG91YmFuLmNvbS9wZW9wbGUvNTY0MDAyMTQ=" title="豆瓣 → https://www.douban.com/people/56400214"><i class="fa fa-fw fa-custom douban"></i></span>
+      </span>
+      <span class="links-of-author-item">
+        <span class="exturl" data-url="aHR0cHM6Ly93d3cuemhpaHUuY29tL3Blb3BsZS9zMzNoMHc=" title="知乎 → https://www.zhihu.com/people/s33h0w"><i class="fa fa-fw fa-custom zhihu"></i></span>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-crow"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder"><span class="exturl theme-link" data-url="aHR0cHM6Ly9naXRodWIuY29tL3MzM2gwdw==">s33h0w</span>
+  </span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script>
+<script src="/js/schemes/muse.js"></script>
+<script src="/js/next-boot.js"></script>
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  <script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID: '911aba6a2761f62d8739',
+      clientSecret: '7df6a704729a996fc519bea74e3615f585b49d1c',
+      repo: 's33h0w.github.io',
+      owner: 's33h0w',
+      admin: ['s33h0w'],
+      id: '80453a21c5461a5f96f534c6a9e7f05e',
+        language: 'zh-CN',
+      distractionFreeMode: 'true'
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+</script>
+
+</body>
+</html>

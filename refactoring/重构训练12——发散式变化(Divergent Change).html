@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 3.9.0">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon.ico">
+  <link rel="alternate" href="/atom.xml" title="s33h0w" type="application/atom+xml">
+  <meta name="google-site-verification" content="8RSRHXGE7qa0lM0SZqS5rLk_KUrRzq-kcvjEgS9Bk7w">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Noto Sans SC:300,300italic,400,400italic,700,700italic|Fira Code:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '7.5.0',
+    exturl: true,
+    sidebar: {"position":"right","width":270,"display":"post","offset":12,"onmobile":false},
+    copycode: {"enable":true,"show_result":true,"style":"flat"},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="每当要对某处做修改时，需要在多个上下文环境进行修改，发散式变化坏味道就出现了。">
+<meta name="keywords" content="重构">
+<meta property="og:type" content="article">
+<meta property="og:title" content="重构训练12——发散式变化(Divergent Change)">
+<meta property="og:url" content="https://s33h0w.me/refactoring/重构训练12——发散式变化(Divergent Change).html">
+<meta property="og:site_name" content="s33h0w">
+<meta property="og:description" content="每当要对某处做修改时，需要在多个上下文环境进行修改，发散式变化坏味道就出现了。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2020-10-05T08:01:12.142Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="重构训练12——发散式变化(Divergent Change)">
+<meta name="twitter:description" content="每当要对某处做修改时，需要在多个上下文环境进行修改，发散式变化坏味道就出现了。">
+
+<link rel="canonical" href="https://s33h0w.me/refactoring/重构训练12——发散式变化(Divergent Change).html">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>重构训练12——发散式变化(Divergent Change) | s33h0w</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="site-title">s33h0w</span>
+      </a>
+    </div>
+        <h1 class="site-subtitle" itemprop="description">be indie</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-crow"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="搜索..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://s33h0w.me/refactoring/重构训练12——发散式变化(Divergent Change).html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/s33h0w.png">
+      <meta itemprop="name" content="s33h0w">
+      <meta itemprop="description" content="In the final analysis it is between you and God. It was never between you and them anyway.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="s33h0w">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          重构训练12——发散式变化(Divergent Change)
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-10-04 20:00:00" itemprop="dateCreated datePublished" datetime="2020-10-04T20:00:00+08:00">2020-10-04</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>每当要对某处做修改时，需要在多个上下文环境进行修改，发散式变化坏味道就出现了。</p>
+<a id="more"></a>
+<h3 id="Problem"><a href="#Problem" class="headerlink" title="Problem"></a>Problem</h3><p>假设一个场景，customer 和 agent 都需要获取 listing 的更新时间，而且 agent 还能修改更新时间。目前 listing 的时间为 UTC 时间，customer 和 agent 在读写时需要根据自身的 timezone 转化为本地时间，代码如下。我们将关注点放在对 listing 更新时间的处理上。请问这样的设计有没有问题？</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123;<span class="keyword">set</span>&#125; <span class="keyword">from</span> <span class="string">'lodash'</span>;</span><br><span class="line"><span class="keyword">import</span> &#123;format, parse&#125; <span class="keyword">from</span> <span class="string">'date-fns'</span>;</span><br><span class="line"><span class="keyword">import</span> &#123;utcToZonedTime, zonedTimeToUtc&#125; <span class="keyword">from</span> <span class="string">'date-fns-tz'</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">interface</span> Lisiting &#123;</span><br><span class="line">  date: &#123;</span><br><span class="line">    updated: <span class="built_in">number</span>;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> Customer &#123;</span><br><span class="line">  timezone: <span class="built_in">string</span>;</span><br><span class="line">  </span><br><span class="line">  getListingUpdatedDate(listing: Listing): <span class="built_in">string</span> &#123;</span><br><span class="line">    <span class="keyword">const</span> date = <span class="keyword">new</span> <span class="built_in">Date</span>(listing.date.updated);</span><br><span class="line">    <span class="keyword">const</span> utcDate = utcToZonedTime(date, <span class="keyword">this</span>.timezone)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> formatDate(utcDate);</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> Agent &#123;</span><br><span class="line">  timezone: <span class="built_in">string</span>;</span><br><span class="line">  </span><br><span class="line">  getListingUpdatedDate(listing: Listing): <span class="built_in">string</span> &#123;</span><br><span class="line">    <span class="keyword">const</span> date = <span class="keyword">new</span> <span class="built_in">Date</span>(listing.date.updated);</span><br><span class="line">    <span class="keyword">const</span> utcDate = utcToZonedTime(date, timezone)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">return</span> formatDate(utcDate);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">	setListingUpdatedDate(listing: Listing, dateString: <span class="built_in">string</span>): <span class="built_in">void</span> &#123;</span><br><span class="line">    <span class="keyword">const</span> date = parseDate(dateString);</span><br><span class="line">    <span class="keyword">const</span> utcDate = zonedTimeToUtc(<span class="keyword">new</span> <span class="built_in">Date</span>(date), timezone)</span><br><span class="line"></span><br><span class="line">    <span class="keyword">const</span> newListing = <span class="keyword">set</span>(&#123;...listing&#125;, [<span class="string">'date'</span>, <span class="string">'updated'</span>], utcDate)</span><br><span class="line">    <span class="comment">// assuming it's an api call</span></span><br><span class="line">    updateListing(newListing)</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// e.g. =&gt; '02/23/2020'</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">formatDate</span>(<span class="params">date: <span class="built_in">Date</span></span>): <span class="title">string</span> </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> format(date, <span class="string">'MM/dd/yyyy'</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">parseDate</span>(<span class="params">dateString: <span class="built_in">string</span></span>): <span class="title">Date</span> </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> parse(dateString, <span class="string">'MM/dd/yyyy'</span>, <span class="keyword">new</span> <span class="built_in">Date</span>())</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="Solution"><a href="#Solution" class="headerlink" title="Solution"></a>Solution</h3><p>有些坏味道单看代码可能不易察觉，只有当它们受到挑战时才显露其脆弱。我们试着挑战一下这些代码。假设listing 的数据结构发生了变化，现在 listing.updated 代表 listing 的更新时间。以上代码需要做怎样的改动呢？或者假如 listing.updated 没有使用 UTC 时间，而是根据 listing.location.timezone 进行转化后的本地时间。customer 和 agent 想要读写正确的时间的话，代码又该如何变动呢？</p>
+<p>如果亲自去实现以上需求就会发现，为了适应 listing更新时间的变动，我们需要在不止一个地方进行对应的调整。目前是 Customer 和 Agent ，如果有其他地方也有类似的调用，无疑也需要一一更改。这就是<strong>发散式变化</strong>的坏味道——每当要对某处做修改时，需要在多个上下文环境进行修改。</p>
+<p>解决方法在于维护一个纯净的上下文环境，使我们“每次只关心一个上下文”。比如 Customer 这个类，本身是 customer 的上下文，却需要关心 listing 的更新时间是如何被处理的。我们可以通过提炼函数，搬移函数，提炼类等等方法使 Customer 再次变得纯净。</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// client.ts</span></span><br><span class="line"><span class="keyword">import</span> &#123;getListingUpdatedDate, setListingUpdatedDate&#125; <span class="keyword">from</span> <span class="string">'@utils/listing-updated'</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> Customer &#123;</span><br><span class="line">  timezone: <span class="built_in">string</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// customer get listing updated date</span></span><br><span class="line">getListingUpdatedDate(listing, customer.timezone)</span><br><span class="line"></span><br><span class="line"><span class="keyword">class</span> Agent &#123;</span><br><span class="line">  timezone: <span class="built_in">string</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// agent get listing updated date</span></span><br><span class="line">getListingUpdatedDate(listing, agent.timezone)</span><br><span class="line"></span><br><span class="line"><span class="comment">// agent set listing updated date</span></span><br><span class="line">setListingUpdatedDate(listing, dateString, agent.timezone)</span><br><span class="line"></span><br><span class="line"><span class="comment">// utils/listing-updated.ts</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> &#123;<span class="keyword">set</span>&#125; <span class="keyword">from</span> <span class="string">'lodash'</span>;</span><br><span class="line"><span class="keyword">import</span> &#123;format, parse&#125; <span class="keyword">from</span> <span class="string">'date-fns'</span>;</span><br><span class="line"><span class="keyword">import</span> &#123;utcToZonedTime, zonedTimeToUtc&#125; <span class="keyword">from</span> <span class="string">'date-fns-tz'</span>;</span><br><span class="line"></span><br><span class="line"><span class="keyword">interface</span> Listing &#123;</span><br><span class="line">  date: &#123;</span><br><span class="line">    updated: <span class="built_in">number</span>;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="function"><span class="keyword">function</span> <span class="title">getListingUpdatedDate</span>(<span class="params">listing: Listing, timezone: <span class="built_in">string</span></span>): <span class="title">string</span> </span>&#123;</span><br><span class="line">  <span class="keyword">const</span> date = <span class="keyword">new</span> <span class="built_in">Date</span>(listing.date.updated);</span><br><span class="line">  <span class="keyword">const</span> utcDate = utcToZonedTime(date, timezone)</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> formatDate(utcDate);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="keyword">export</span> <span class="function"><span class="keyword">function</span> <span class="title">setListingUpdatedDate</span>(<span class="params">listing: Listing, dateString: <span class="built_in">string</span>, timezone: <span class="built_in">string</span></span>): <span class="title">void</span> </span>&#123;</span><br><span class="line">  <span class="keyword">const</span> date = parseDate(dateString);</span><br><span class="line">	<span class="keyword">const</span> utcDate = zonedTimeToUtc(<span class="keyword">new</span> <span class="built_in">Date</span>(date), timezone)</span><br><span class="line"></span><br><span class="line">	<span class="keyword">const</span> newListing = <span class="keyword">set</span>(&#123;...listing&#125;, [<span class="string">'date'</span>, <span class="string">'updated'</span>], utcDate)</span><br><span class="line">	<span class="comment">// assuming it's an api call</span></span><br><span class="line">	updateListing(newListing)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// e.g. =&gt; '02/23/2020'</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">formatDate</span>(<span class="params">date: <span class="built_in">Date</span></span>): <span class="title">string</span> </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> format(date, <span class="string">'MM/dd/yyyy'</span>)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">parseDate</span>(<span class="params">dateString: <span class="built_in">string</span></span>): <span class="title">Date</span> </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> parse(dateString, <span class="string">'MM/dd/yyyy'</span>, <span class="keyword">new</span> <span class="built_in">Date</span>())</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>在这里我移除了 Customer 和 Agent 中关于 listing 更新时间的处理，将它们移入到了 listing-updated 模块。（当然你也可以创建 Listing 类，然后将这些方法作为 Listing 类的方法。由于前端的处理中不会变化 listing 数据，这里选择了更函数式的做法。）现在所有有关 listing 更新时间的变更都只需在 listing-updated 中完成。</p>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p><strong>发散式变化</strong>经常是由于我们简单地复制粘贴代码导致的。这些代码起初属于某个上下文，后来被粘贴到了不同的地方。因此每当这个上下文发生变动时就会有许多地方同时需要被改变。解决方法在于通过提炼函数、搬移函数、提炼类等手段将分散的代码提炼至属于自己的上下文环境。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tags/重构/" rel="tag"><i class="fa fa-tag"></i> 重构</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-next post-nav-item">
+                <a href="/refactoring/重构训练11——夸夸其谈通用性(Speculative Generality).html" rel="next" title="重构训练11——夸夸其谈通用性(Speculative Generality)">
+                  <i class="fa fa-chevron-left"></i> 重构训练11——夸夸其谈通用性(Speculative Generality)
+                </a>
+            </div>
+
+            <span class="post-nav-divider"></span>
+
+            <div class="post-nav-prev post-nav-item">
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#Problem"><span class="nav-number">1.</span> <span class="nav-text">Problem</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Solution"><span class="nav-number">2.</span> <span class="nav-text">Solution</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#总结"><span class="nav-number">3.</span> <span class="nav-text">总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="s33h0w"
+      src="/images/s33h0w.png">
+  <p class="site-author-name" itemprop="name">s33h0w</p>
+  <div class="site-description" itemprop="description">In the final analysis it is between you and God. It was never between you and them anyway.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">18</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="feed-link motion-element">
+    <a href="/atom.xml" rel="alternate">
+      <i class="fa fa-rss"></i>RSS
+    </a>
+  </div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3MzM2gwdw==" title="GitHub → https://github.com/s33h0w"><i class="fa fa-fw fa-github"></i></span>
+      </span>
+      <span class="links-of-author-item">
+        <span class="exturl" data-url="aHR0cHM6Ly93d3cuZG91YmFuLmNvbS9wZW9wbGUvNTY0MDAyMTQ=" title="豆瓣 → https://www.douban.com/people/56400214"><i class="fa fa-fw fa-custom douban"></i></span>
+      </span>
+      <span class="links-of-author-item">
+        <span class="exturl" data-url="aHR0cHM6Ly93d3cuemhpaHUuY29tL3Blb3BsZS9zMzNoMHc=" title="知乎 → https://www.zhihu.com/people/s33h0w"><i class="fa fa-fw fa-custom zhihu"></i></span>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-crow"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder"><span class="exturl theme-link" data-url="aHR0cHM6Ly9naXRodWIuY29tL3MzM2gwdw==">s33h0w</span>
+  </span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script>
+<script src="/js/schemes/muse.js"></script>
+<script src="/js/next-boot.js"></script>
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  <script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID: '911aba6a2761f62d8739',
+      clientSecret: '7df6a704729a996fc519bea74e3615f585b49d1c',
+      repo: 's33h0w.github.io',
+      owner: 's33h0w',
+      admin: ['s33h0w'],
+      id: '250fb531f8c9cf37eaf624955b3d7ed2',
+        language: 'zh-CN',
+      distractionFreeMode: 'true'
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+</script>
+
+</body>
+</html>

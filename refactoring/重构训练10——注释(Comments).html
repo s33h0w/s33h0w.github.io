@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 3.9.0">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon.ico">
+  <link rel="alternate" href="/atom.xml" title="s33h0w" type="application/atom+xml">
+  <meta name="google-site-verification" content="8RSRHXGE7qa0lM0SZqS5rLk_KUrRzq-kcvjEgS9Bk7w">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Noto Sans SC:300,300italic,400,400italic,700,700italic|Fira Code:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '7.5.0',
+    exturl: true,
+    sidebar: {"position":"right","width":270,"display":"post","offset":12,"onmobile":false},
+    copycode: {"enable":true,"show_result":true,"style":"flat"},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="如果可以，我们应该尽量不写注释。原因很简单——程序员不能坚持维护注释。">
+<meta name="keywords" content="重构">
+<meta property="og:type" content="article">
+<meta property="og:title" content="重构训练10——注释(Comments)">
+<meta property="og:url" content="https://s33h0w.me/refactoring/重构训练10——注释(Comments).html">
+<meta property="og:site_name" content="s33h0w">
+<meta property="og:description" content="如果可以，我们应该尽量不写注释。原因很简单——程序员不能坚持维护注释。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2020-09-08T07:16:26.299Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="重构训练10——注释(Comments)">
+<meta name="twitter:description" content="如果可以，我们应该尽量不写注释。原因很简单——程序员不能坚持维护注释。">
+
+<link rel="canonical" href="https://s33h0w.me/refactoring/重构训练10——注释(Comments).html">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>重构训练10——注释(Comments) | s33h0w</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="site-title">s33h0w</span>
+      </a>
+    </div>
+        <h1 class="site-subtitle" itemprop="description">be indie</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-crow"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="搜索..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://s33h0w.me/refactoring/重构训练10——注释(Comments).html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/s33h0w.png">
+      <meta itemprop="name" content="s33h0w">
+      <meta itemprop="description" content="In the final analysis it is between you and God. It was never between you and them anyway.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="s33h0w">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          重构训练10——注释(Comments)
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-09-06 15:00:00" itemprop="dateCreated datePublished" datetime="2020-09-06T15:00:00+08:00">2020-09-06</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>如果可以，我们应该尽量不写注释。原因很简单——程序员不能坚持维护注释。</p>
+<a id="more"></a>
+<h2 id="注释往往是代码需要重构的征兆"><a href="#注释往往是代码需要重构的征兆" class="headerlink" title="注释往往是代码需要重构的征兆"></a>注释往往是代码需要重构的征兆</h2><p>“别给糟糕的代码加注释——重新写吧！”</p>
+<h3 id="Problem1"><a href="#Problem1" class="headerlink" title="Problem1"></a>Problem1</h3><figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// if it's not summer, use the winter rate</span></span><br><span class="line"><span class="keyword">if</span> (date.before(SUMMER_START) || date.after(SUMMER_END)) &#123;</span><br><span class="line">  charge = quantity * winterRate;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">else</span> &#123;</span><br><span class="line">  charge = quantity * summerRate;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="Solution1"><a href="#Solution1" class="headerlink" title="Solution1"></a>Solution1</h3><p>如果你需要注释来解释一段代码做了什么，试试提炼函数。</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">isSummer</span>(<span class="params">date</span>): <span class="title">boolean</span> </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> date.after(SUMMER_START) &amp;&amp; date.before(SUMMER_END)</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">...</span><br><span class="line"></span><br><span class="line"><span class="keyword">if</span> (isSummer(date)) &#123;</span><br><span class="line">  charge = quantity * winterRate;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">else</span> &#123;</span><br><span class="line">  charge = quantity * summerRate;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="Problem2"><a href="#Problem2" class="headerlink" title="Problem2"></a>Problem2</h3><figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// get the sum of bedroom and bathroom</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">theNumber</span>(<span class="params">rooms: Room[]</span>): <span class="title">number</span> </span>&#123;</span><br><span class="line">  <span class="keyword">const</span> bedroomNum = rooms.filter(<span class="function">(<span class="params">r</span>) =&gt;</span> r.roomType === <span class="string">'bedroom'</span>).length;</span><br><span class="line">  <span class="keyword">const</span> bathroomNum = rooms.filter(<span class="function">(<span class="params">r</span>) =&gt;</span> r.roomType === <span class="string">'bathroom'</span>).length;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> bedroomNum + bathroomNum;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="Solution2"><a href="#Solution2" class="headerlink" title="Solution2"></a>Solution2</h3><p>如果函数仍需要注释来解释其做了什么，试试改变函数声明。</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">getSumOfBedroomAndBathroom</span>(<span class="params">rooms: Room[]</span>): <span class="title">number</span> </span>&#123;</span><br><span class="line">  ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>好的代码可以自解释，而糟糕的代码往往需要注释的帮助。因此当你觉得要用注释去帮助解释函数做了什么的时候，请先尝试重构。顺着注释我们可以找到一些代码的坏味道，消除这些坏味道然后再考虑注释是否值得保留。</p>
+<h2 id="大多数注释只是画蛇添足"><a href="#大多数注释只是画蛇添足" class="headerlink" title="大多数注释只是画蛇添足"></a>大多数注释只是画蛇添足</h2><figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * @author s33h0w</span></span><br><span class="line"><span class="comment"> * @date 2020-09-06 22:00</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">type</span> Employee = &#123;</span><br><span class="line">  id: <span class="built_in">string</span>;</span><br><span class="line">  job: <span class="string">"programmer"</span> | <span class="string">"other"</span>;</span><br><span class="line">  salary: <span class="built_in">number</span>;</span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="comment">// function getTotalSalary(employees: Employee[]): number &#123;</span></span><br><span class="line"><span class="comment">//  return employees.map((it) =&gt; it.salary).reduce((acc, item) =&gt; acc + item, 0);</span></span><br><span class="line"><span class="comment">// &#125;</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// get sum of the employees' salary</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">sumSalary</span>(<span class="params">employees: Employee[]</span>): <span class="title">number</span> </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> employees.map(<span class="function">(<span class="params">it</span>) =&gt;</span> it.salary).reduce(<span class="function">(<span class="params">acc, item</span>) =&gt;</span> acc + item, <span class="number">0</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">/**</span></span><br><span class="line"><span class="comment"> * get total salary and programmer's salary</span></span><br><span class="line"><span class="comment"> *</span></span><br><span class="line"><span class="comment"> * @param &#123;Employee[]&#125; employees</span></span><br><span class="line"><span class="comment"> * @returns &#123;&#123;</span></span><br><span class="line"><span class="comment"> *   totalSalary: number;</span></span><br><span class="line"><span class="comment"> *   programmerSalary: number;</span></span><br><span class="line"><span class="comment"> * &#125;&#125;</span></span><br><span class="line"><span class="comment"> */</span></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">getTotalSalaryAndProgrammerSalary</span>(<span class="params"></span></span></span><br><span class="line"><span class="function"><span class="params">  employees: Employee[]</span></span></span><br><span class="line"><span class="function"><span class="params"></span>): </span>&#123;</span><br><span class="line">  totalSalary: <span class="built_in">number</span>;</span><br><span class="line">  programmerSalary: <span class="built_in">number</span>;</span><br><span class="line">&#125; &#123;</span><br><span class="line">  <span class="keyword">const</span> totalSalary = sumSalary(employees);</span><br><span class="line">  <span class="keyword">const</span> programmerSalary = sumSalary(</span><br><span class="line">    employees.filter(<span class="function">(<span class="params">it</span>) =&gt;</span> it.job === <span class="string">"programmer"</span>)</span><br><span class="line">  );</span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> &#123;</span><br><span class="line">    totalSalary,</span><br><span class="line">    programmerSalary</span><br><span class="line">  &#125;;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>以上注释我按照位置编号为 Comment1, Comment2, Comment3 和 Comment4，虽然样貌不同，但它们都一样多余。</p>
+<p>Comment1——日志式注释：忘了它吧，现在我们有 git。</p>
+<p>Comment2——注释掉的代码：这是我最害怕的注释，因为没人敢告诉我它是否能被删除。所以如果代码没有用，就立刻删除它。不用担心会丢掉，毕竟你的代码北极都有。</p>
+<p>Comment3——废话注释：<code>sumSalary</code>这个函数名早已说明一切，这个注释只是再重复一遍而已，它没有告诉我们任何其它的信息。</p>
+<p>Comment4——循规蹈矩的注释：如果我们不是在撰写一些类似公共 API 这类东西，仅仅是某个内部调用的函数是无需这种注释的。这种注释的初衷大多是为了方便 IDE 解析文档或为一些开放接口提供更多的上下文信息。如果只是为了让代码看起来更“正规”，大可不必这样做。我自己的习惯是仅仅为那些被其他模块（文件）调用的函数添加这种注释，毕竟维护它的代价不小。</p>
+<h2 id="好注释"><a href="#好注释" class="headerlink" title="好注释"></a>好注释</h2><p>以上都是坏注释的案例，但这并不是说我们不该用注释。好的注释非常有用，下面介绍一些常见的好注释。</p>
+<ul>
+<li>法律信息：例如版权及著作声明等等。</li>
+<li>提供必要信息：比如关于代码中一些特殊值的含义，有助于理解的上下文信息，警示信息，设计时的关键决策等等</li>
+<li>TODO 注释：好的 TODO 注释的格式是：<code>TODO(name): description</code></li>
+<li>公共 API 中的文档型注释：良好的描述对所有人都是一种帮助</li>
+</ul>
+<h2 id="总结-1"><a href="#总结-1" class="headerlink" title="总结"></a>总结</h2><p>好的注释帮助巨大，坏注释破坏巨大。注释不能美化糟糕的代码，只有代码本身不足以表达所有必要信息时，我们才需要注释。如果可以，我们应该尽量不写注释。原因很简单——程序员不能坚持维护注释。</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tags/重构/" rel="tag"><i class="fa fa-tag"></i> 重构</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-next post-nav-item">
+                <a href="/refactoring/重构训练09——可变数据(Mutable Data).html" rel="next" title="重构训练09——可变数据(Mutable-Data)">
+                  <i class="fa fa-chevron-left"></i> 重构训练09——可变数据(Mutable-Data)
+                </a>
+            </div>
+
+            <span class="post-nav-divider"></span>
+
+            <div class="post-nav-prev post-nav-item">
+                <a href="/refactoring/重构训练11——夸夸其谈通用性(Speculative Generality).html" rel="prev" title="重构训练11——夸夸其谈通用性(Speculative Generality)">
+                  重构训练11——夸夸其谈通用性(Speculative Generality) <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#注释往往是代码需要重构的征兆"><span class="nav-number">1.</span> <span class="nav-text">注释往往是代码需要重构的征兆</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Problem1"><span class="nav-number">1.1.</span> <span class="nav-text">Problem1</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Solution1"><span class="nav-number">1.2.</span> <span class="nav-text">Solution1</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Problem2"><span class="nav-number">1.3.</span> <span class="nav-text">Problem2</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Solution2"><span class="nav-number">1.4.</span> <span class="nav-text">Solution2</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#总结"><span class="nav-number">1.5.</span> <span class="nav-text">总结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#大多数注释只是画蛇添足"><span class="nav-number">2.</span> <span class="nav-text">大多数注释只是画蛇添足</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#好注释"><span class="nav-number">3.</span> <span class="nav-text">好注释</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#总结-1"><span class="nav-number">4.</span> <span class="nav-text">总结</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="s33h0w"
+      src="/images/s33h0w.png">
+  <p class="site-author-name" itemprop="name">s33h0w</p>
+  <div class="site-description" itemprop="description">In the final analysis it is between you and God. It was never between you and them anyway.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">18</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="feed-link motion-element">
+    <a href="/atom.xml" rel="alternate">
+      <i class="fa fa-rss"></i>RSS
+    </a>
+  </div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3MzM2gwdw==" title="GitHub → https://github.com/s33h0w"><i class="fa fa-fw fa-github"></i></span>
+      </span>
+      <span class="links-of-author-item">
+        <span class="exturl" data-url="aHR0cHM6Ly93d3cuZG91YmFuLmNvbS9wZW9wbGUvNTY0MDAyMTQ=" title="豆瓣 → https://www.douban.com/people/56400214"><i class="fa fa-fw fa-custom douban"></i></span>
+      </span>
+      <span class="links-of-author-item">
+        <span class="exturl" data-url="aHR0cHM6Ly93d3cuemhpaHUuY29tL3Blb3BsZS9zMzNoMHc=" title="知乎 → https://www.zhihu.com/people/s33h0w"><i class="fa fa-fw fa-custom zhihu"></i></span>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-crow"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder"><span class="exturl theme-link" data-url="aHR0cHM6Ly9naXRodWIuY29tL3MzM2gwdw==">s33h0w</span>
+  </span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script>
+<script src="/js/schemes/muse.js"></script>
+<script src="/js/next-boot.js"></script>
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  <script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID: '911aba6a2761f62d8739',
+      clientSecret: '7df6a704729a996fc519bea74e3615f585b49d1c',
+      repo: 's33h0w.github.io',
+      owner: 's33h0w',
+      admin: ['s33h0w'],
+      id: '0c8e6063714d68781b037bd2944103eb',
+        language: 'zh-CN',
+      distractionFreeMode: 'true'
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+</script>
+
+</body>
+</html>

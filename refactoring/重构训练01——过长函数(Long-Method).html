@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 3.9.0">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon.ico">
+  <link rel="alternate" href="/atom.xml" title="s33h0w" type="application/atom+xml">
+  <meta name="google-site-verification" content="8RSRHXGE7qa0lM0SZqS5rLk_KUrRzq-kcvjEgS9Bk7w">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Noto Sans SC:300,300italic,400,400italic,700,700italic|Fira Code:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '7.5.0',
+    exturl: true,
+    sidebar: {"position":"right","width":270,"display":"post","offset":12,"onmobile":false},
+    copycode: {"enable":true,"show_result":true,"style":"flat"},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="“据我们的经验，活得最长、最好的程序，其中的函数都比较短。”">
+<meta name="keywords" content="重构">
+<meta property="og:type" content="article">
+<meta property="og:title" content="重构训练01——过长函数(Long-Method)">
+<meta property="og:url" content="https://s33h0w.me/refactoring/重构训练01——过长函数(Long-Method).html">
+<meta property="og:site_name" content="s33h0w">
+<meta property="og:description" content="“据我们的经验，活得最长、最好的程序，其中的函数都比较短。”">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:updated_time" content="2020-08-30T03:04:16.052Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="重构训练01——过长函数(Long-Method)">
+<meta name="twitter:description" content="“据我们的经验，活得最长、最好的程序，其中的函数都比较短。”">
+
+<link rel="canonical" href="https://s33h0w.me/refactoring/重构训练01——过长函数(Long-Method).html">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>重构训练01——过长函数(Long-Method) | s33h0w</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="site-title">s33h0w</span>
+      </a>
+    </div>
+        <h1 class="site-subtitle" itemprop="description">be indie</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-crow"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="搜索..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://s33h0w.me/refactoring/重构训练01——过长函数(Long-Method).html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/s33h0w.png">
+      <meta itemprop="name" content="s33h0w">
+      <meta itemprop="description" content="In the final analysis it is between you and God. It was never between you and them anyway.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="s33h0w">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          重构训练01——过长函数(Long-Method)
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-07-07 23:23:23" itemprop="dateCreated datePublished" datetime="2020-07-07T23:23:23+08:00">2020-07-07</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>“据我们的经验，活得最长、最好的程序，其中的函数都比较短。”<br><a id="more"></a></p>
+<h2 id="函数需要用注释来说明点什么"><a href="#函数需要用注释来说明点什么" class="headerlink" title="函数需要用注释来说明点什么"></a>函数需要用注释来说明点什么</h2><h3 id="Problem"><a href="#Problem" class="headerlink" title="Problem"></a>Problem</h3><figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">printOwing</span>(<span class="params">invoice: Invoice</span>): <span class="title">void</span> </span>&#123;</span><br><span class="line">  <span class="comment">// print banner</span></span><br><span class="line">  <span class="built_in">console</span>.log(<span class="string">"***********************"</span>);</span><br><span class="line">  <span class="built_in">console</span>.log(<span class="string">"**** Customer Owes ****"</span>);</span><br><span class="line">  <span class="built_in">console</span>.log(<span class="string">"***********************"</span>);</span><br><span class="line"></span><br><span class="line">  <span class="comment">// record due date</span></span><br><span class="line">  <span class="keyword">const</span> today = Clock.today;</span><br><span class="line">  invoice.dueDate = <span class="keyword">new</span> <span class="built_in">Date</span>(today.getFullYear(), today.getMonth(), today.getDate() + <span class="number">30</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="Solution-Extract-Function-提炼函数"><a href="#Solution-Extract-Function-提炼函数" class="headerlink" title="Solution: Extract Function 提炼函数"></a>Solution: Extract Function 提炼函数</h3><figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">printOwing</span>(<span class="params">invoice: Invoice</span>): <span class="title">void</span> </span>&#123;</span><br><span class="line">  printBanner();</span><br><span class="line">  recordDueDate(invoice);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">printBanner</span>(<span class="params"></span>): <span class="title">void</span> </span>&#123;</span><br><span class="line">  <span class="built_in">console</span>.log(<span class="string">"***********************"</span>);</span><br><span class="line">  <span class="built_in">console</span>.log(<span class="string">"**** Customer Owes ****"</span>);</span><br><span class="line">  <span class="built_in">console</span>.log(<span class="string">"***********************"</span>);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">recordDueDate</span>(<span class="params">invoice: Invoice</span>): <span class="title">void</span> </span>&#123;</span><br><span class="line">  <span class="keyword">const</span> today = Clock.today;</span><br><span class="line">  invoice.dueDate = <span class="keyword">new</span> <span class="built_in">Date</span>(today.getFullYear(), today.getMonth(), today.getDate() + <span class="number">30</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p>(判断是否提炼)“关键不在于函数的长度，而在于函数“做什么”和“如何做”之间的语义距离。如何确定该提炼哪一段代码呢？一个很好的技巧是：寻找注释。”</p>
+<ol>
+<li>根据注释<code>print banner</code>，提炼出 <code>printBanner()</code> =&gt; <strong>Extract Function 提炼函数</strong></li>
+<li>根据注释<code>record due date</code>，提炼出<code>recordDueDate()</code> =&gt; <strong>Extract Function 提炼函数</strong></li>
+</ol>
+<h2 id="有大量的本地变量和参数妨碍提炼函数"><a href="#有大量的本地变量和参数妨碍提炼函数" class="headerlink" title="有大量的本地变量和参数妨碍提炼函数"></a>有大量的本地变量和参数妨碍提炼函数</h2><h3 id="临时变量"><a href="#临时变量" class="headerlink" title="临时变量"></a>临时变量</h3><h4 id="Problem-1"><a href="#Problem-1" class="headerlink" title="Problem"></a>Problem</h4><figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">calculateTotal</span>(<span class="params"></span>): <span class="title">number</span> </span>&#123;</span><br><span class="line">  <span class="keyword">let</span> basePrice = quantity * itemPrice;</span><br><span class="line">  <span class="keyword">if</span> (basePrice &gt; <span class="number">1000</span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> basePrice * <span class="number">0.95</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> basePrice * <span class="number">0.98</span>;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="Solution-Replace-Temp-with-Query-以查询取代临时变量"><a href="#Solution-Replace-Temp-with-Query-以查询取代临时变量" class="headerlink" title="Solution: Replace Temp with Query 以查询取代临时变量"></a>Solution: Replace Temp with Query 以查询取代临时变量</h4><figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">calculateTotal</span>(<span class="params"></span>): <span class="title">number</span> </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (basePrice() &gt; <span class="number">1000</span>) &#123;</span><br><span class="line">    <span class="keyword">return</span> basePrice() * <span class="number">0.95</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">else</span> &#123;</span><br><span class="line">    <span class="keyword">return</span> basePrice() * <span class="number">0.98</span>;</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">basePrice</span>(<span class="params"></span>): <span class="title">number</span> </span>&#123;</span><br><span class="line">  <span class="keyword">return</span> quantity * itemPrice;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="参数总是成对出现"><a href="#参数总是成对出现" class="headerlink" title="参数总是成对出现"></a>参数总是成对出现</h3><h4 id="Problem-2"><a href="#Problem-2" class="headerlink" title="Problem"></a>Problem</h4><figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">amountInvoiced</span>(<span class="params">startDate, endDate</span>) </span>&#123;...&#125;</span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">amountReceived</span>(<span class="params">startDate, endDate</span>) </span>&#123;...&#125;</span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">amountOverdue</span>(<span class="params">startDate, endDate</span>) </span>&#123;...&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="Solution-Introduce-Parameter-Object-引入参数对象"><a href="#Solution-Introduce-Parameter-Object-引入参数对象" class="headerlink" title="Solution: Introduce Parameter Object 引入参数对象"></a>Solution: Introduce Parameter Object 引入参数对象</h4><figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">amountInvoiced</span>(<span class="params">aDateRange</span>) </span>&#123;...&#125;</span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">amountReceived</span>(<span class="params">aDateRange</span>) </span>&#123;...&#125;</span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">amountOverdue</span>(<span class="params">aDateRange</span>) </span>&#123;...&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="参数中分别引入了某个对象的多个属性"><a href="#参数中分别引入了某个对象的多个属性" class="headerlink" title="参数中分别引入了某个对象的多个属性"></a>参数中分别引入了某个对象的多个属性</h3><h4 id="Problem-3"><a href="#Problem-3" class="headerlink" title="Problem"></a>Problem</h4><figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> low = daysTempRange.getLow();</span><br><span class="line"><span class="keyword">let</span> high = daysTempRange.getHigh();</span><br><span class="line"><span class="keyword">let</span> withinPlan = plan.withinRange(low, high);</span><br></pre></td></tr></table></figure>
+<h4 id="Solution-Preserve-Whole-Object-保持对象完整"><a href="#Solution-Preserve-Whole-Object-保持对象完整" class="headerlink" title="Solution: Preserve Whole Object 保持对象完整"></a>Solution: Preserve Whole Object 保持对象完整</h4><figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">let</span> withinPlan = plan.withinRange(daysTempRange);</span><br></pre></td></tr></table></figure>
+<h3 id="总结-1"><a href="#总结-1" class="headerlink" title="总结"></a>总结</h3><p>如果函数内有大量的参数和临时变量，对你提炼函数造成阻碍，使用：<strong>Replace Temp with Query 以查询取代临时变量</strong>，<strong>Introduce Parameter Object 引入参数对象</strong>，<strong>Preserve Whole Object 保持对象完整</strong>。</p>
+<h2 id="函数中出现了条件表达式和循环"><a href="#函数中出现了条件表达式和循环" class="headerlink" title="函数中出现了条件表达式和循环"></a>函数中出现了条件表达式和循环</h2><h3 id="复杂的条件表达式"><a href="#复杂的条件表达式" class="headerlink" title="复杂的条件表达式"></a>复杂的条件表达式</h3><h4 id="Problem-4"><a href="#Problem-4" class="headerlink" title="Problem"></a>Problem</h4><figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (date.before(SUMMER_START) || date.after(SUMMER_END)) &#123;</span><br><span class="line">  charge = quantity * winterRate + winterServiceCharge;</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">else</span> &#123;</span><br><span class="line">  charge = quantity * summerRate;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="Solution-Decompose-Conditional-分解条件表达式"><a href="#Solution-Decompose-Conditional-分解条件表达式" class="headerlink" title="Solution: Decompose Conditional 分解条件表达式"></a>Solution: Decompose Conditional 分解条件表达式</h4><figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span> (isSummer(date)) &#123;</span><br><span class="line">  charge = summerCharge(quantity);</span><br><span class="line">&#125;</span><br><span class="line"><span class="keyword">else</span> &#123;</span><br><span class="line">  charge = winterCharge(quantity);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="循环"><a href="#循环" class="headerlink" title="循环"></a>循环</h3><h4 id="Problem-5"><a href="#Problem-5" class="headerlink" title="Problem"></a>Problem</h4><figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">calculateOutstanding</span>(<span class="params">invoice: Invoice</span>): <span class="title">number</span> </span>&#123;</span><br><span class="line">  <span class="keyword">let</span> result = <span class="number">0</span>;</span><br><span class="line">  <span class="keyword">for</span> (<span class="keyword">const</span> o of invoice.orders) &#123;</span><br><span class="line">    result += o.amount;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> result;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="Solution-Extract-Function-提炼函数，Split-Loop-拆分循环，Replace-Loop-with-Pipeline-以管道取代循环"><a href="#Solution-Extract-Function-提炼函数，Split-Loop-拆分循环，Replace-Loop-with-Pipeline-以管道取代循环" class="headerlink" title="Solution: Extract Function 提炼函数，Split Loop 拆分循环，Replace Loop with Pipeline 以管道取代循环"></a>Solution: Extract Function 提炼函数，Split Loop 拆分循环，Replace Loop with Pipeline 以管道取代循环</h4><figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">calculateOutstanding</span>(<span class="params">invoice: Invoice</span>): <span class="title">number</span> </span>&#123;</span><br><span class="line">  <span class="keyword">const</span> reducer = <span class="function">(<span class="params">accumulator: <span class="built_in">number</span>, currentValue: <span class="built_in">number</span></span>) =&gt;</span> accumulator + currentValue;</span><br><span class="line">  <span class="keyword">return</span> invoice.orders.reduce(reducer, <span class="number">0</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h3 id="总结-2"><a href="#总结-2" class="headerlink" title="总结"></a>总结</h3><p>“条件表达式和循环也常常是提炼的信号。”</p>
+<ol>
+<li>根据条件表达式<code>date.before(SUMMER_START) || date.after(SUMMER_END)</code>，提炼函数<code>isSummer(date)</code> =&gt; <strong>Decompose Conditional 分解条件表达式</strong></li>
+<li>根据循环进行提炼函数<code>calculateOutstanding</code> =&gt; <strong>Extract Function 提炼函数</strong></li>
+<li>如果循环中存在多个逻辑，需要拆分 =&gt; <strong>Split Loop 拆分循环</strong></li>
+<li>关于循环的处理还可以更加精进，使用管道代替循环可以使代码更简洁可读性更高 =&gt; <strong>Replace Loop with Pipeline 以管道取代循环</strong></li>
+</ol>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tags/重构/" rel="tag"><i class="fa fa-tag"></i> 重构</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-next post-nav-item">
+                <a href="/angular/从ControlValueAccessor说起——源码分析Angular表单的实现-上.html" rel="next" title="从ControlValueAccessor说起——源码分析Angular表单的实现(上)">
+                  <i class="fa fa-chevron-left"></i> 从ControlValueAccessor说起——源码分析Angular表单的实现(上)
+                </a>
+            </div>
+
+            <span class="post-nav-divider"></span>
+
+            <div class="post-nav-prev post-nav-item">
+                <a href="/refactoring/重构训练02——过大的类(Large-Class).html" rel="prev" title="重构训练02——过大的类(Large-Class)">
+                  重构训练02——过大的类(Large-Class) <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#函数需要用注释来说明点什么"><span class="nav-number">1.</span> <span class="nav-text">函数需要用注释来说明点什么</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Problem"><span class="nav-number">1.1.</span> <span class="nav-text">Problem</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Solution-Extract-Function-提炼函数"><span class="nav-number">1.2.</span> <span class="nav-text">Solution: Extract Function 提炼函数</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#总结"><span class="nav-number">1.3.</span> <span class="nav-text">总结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#有大量的本地变量和参数妨碍提炼函数"><span class="nav-number">2.</span> <span class="nav-text">有大量的本地变量和参数妨碍提炼函数</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#临时变量"><span class="nav-number">2.1.</span> <span class="nav-text">临时变量</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Problem-1"><span class="nav-number">2.1.1.</span> <span class="nav-text">Problem</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Solution-Replace-Temp-with-Query-以查询取代临时变量"><span class="nav-number">2.1.2.</span> <span class="nav-text">Solution: Replace Temp with Query 以查询取代临时变量</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#参数总是成对出现"><span class="nav-number">2.2.</span> <span class="nav-text">参数总是成对出现</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Problem-2"><span class="nav-number">2.2.1.</span> <span class="nav-text">Problem</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Solution-Introduce-Parameter-Object-引入参数对象"><span class="nav-number">2.2.2.</span> <span class="nav-text">Solution: Introduce Parameter Object 引入参数对象</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#参数中分别引入了某个对象的多个属性"><span class="nav-number">2.3.</span> <span class="nav-text">参数中分别引入了某个对象的多个属性</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Problem-3"><span class="nav-number">2.3.1.</span> <span class="nav-text">Problem</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Solution-Preserve-Whole-Object-保持对象完整"><span class="nav-number">2.3.2.</span> <span class="nav-text">Solution: Preserve Whole Object 保持对象完整</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#总结-1"><span class="nav-number">2.4.</span> <span class="nav-text">总结</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#函数中出现了条件表达式和循环"><span class="nav-number">3.</span> <span class="nav-text">函数中出现了条件表达式和循环</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#复杂的条件表达式"><span class="nav-number">3.1.</span> <span class="nav-text">复杂的条件表达式</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Problem-4"><span class="nav-number">3.1.1.</span> <span class="nav-text">Problem</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Solution-Decompose-Conditional-分解条件表达式"><span class="nav-number">3.1.2.</span> <span class="nav-text">Solution: Decompose Conditional 分解条件表达式</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#循环"><span class="nav-number">3.2.</span> <span class="nav-text">循环</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#Problem-5"><span class="nav-number">3.2.1.</span> <span class="nav-text">Problem</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#Solution-Extract-Function-提炼函数，Split-Loop-拆分循环，Replace-Loop-with-Pipeline-以管道取代循环"><span class="nav-number">3.2.2.</span> <span class="nav-text">Solution: Extract Function 提炼函数，Split Loop 拆分循环，Replace Loop with Pipeline 以管道取代循环</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#总结-2"><span class="nav-number">3.3.</span> <span class="nav-text">总结</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="s33h0w"
+      src="/images/s33h0w.png">
+  <p class="site-author-name" itemprop="name">s33h0w</p>
+  <div class="site-description" itemprop="description">In the final analysis it is between you and God. It was never between you and them anyway.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">18</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="feed-link motion-element">
+    <a href="/atom.xml" rel="alternate">
+      <i class="fa fa-rss"></i>RSS
+    </a>
+  </div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3MzM2gwdw==" title="GitHub → https://github.com/s33h0w"><i class="fa fa-fw fa-github"></i></span>
+      </span>
+      <span class="links-of-author-item">
+        <span class="exturl" data-url="aHR0cHM6Ly93d3cuZG91YmFuLmNvbS9wZW9wbGUvNTY0MDAyMTQ=" title="豆瓣 → https://www.douban.com/people/56400214"><i class="fa fa-fw fa-custom douban"></i></span>
+      </span>
+      <span class="links-of-author-item">
+        <span class="exturl" data-url="aHR0cHM6Ly93d3cuemhpaHUuY29tL3Blb3BsZS9zMzNoMHc=" title="知乎 → https://www.zhihu.com/people/s33h0w"><i class="fa fa-fw fa-custom zhihu"></i></span>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-crow"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder"><span class="exturl theme-link" data-url="aHR0cHM6Ly9naXRodWIuY29tL3MzM2gwdw==">s33h0w</span>
+  </span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script>
+<script src="/js/schemes/muse.js"></script>
+<script src="/js/next-boot.js"></script>
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  <script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID: '911aba6a2761f62d8739',
+      clientSecret: '7df6a704729a996fc519bea74e3615f585b49d1c',
+      repo: 's33h0w.github.io',
+      owner: 's33h0w',
+      admin: ['s33h0w'],
+      id: '1730ab3717f640f7e849d4a9e2d78a67',
+        language: 'zh-CN',
+      distractionFreeMode: 'true'
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+</script>
+
+</body>
+</html>

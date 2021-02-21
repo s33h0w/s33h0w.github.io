@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 3.9.0">
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon.ico">
+  <link rel="icon" type="image/png" sizes="16x16" href="/favicon.ico">
+  <link rel="alternate" href="/atom.xml" title="s33h0w" type="application/atom+xml">
+  <meta name="google-site-verification" content="8RSRHXGE7qa0lM0SZqS5rLk_KUrRzq-kcvjEgS9Bk7w">
+
+<link rel="stylesheet" href="/css/main.css">
+
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Noto Sans SC:300,300italic,400,400italic,700,700italic|Fira Code:300,300italic,400,400italic,700,700italic&display=swap&subset=latin,latin-ext">
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/5.14.0/css/all.min.css">
+
+
+<script id="hexo-configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    version: '7.5.0',
+    exturl: true,
+    sidebar: {"position":"right","width":270,"display":"post","offset":12,"onmobile":false},
+    copycode: {"enable":true,"show_result":true,"style":"flat"},
+    back2top: {"enable":true,"sidebar":false,"scrollpercent":false},
+    bookmark: {"enable":false,"color":"#222","save":"auto"},
+    fancybox: false,
+    mediumzoom: false,
+    lazyload: false,
+    pangu: false,
+    algolia: {
+      appID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    },
+    localsearch: {"enable":true,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},
+    path: 'search.xml',
+    motion: {"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}},
+    sidebarPadding: 40
+  };
+</script>
+
+  <meta name="description" content="Angular是一个MVC类框架，Angular表单可以分为模型与视图两部分。ControlValueAccessor是表单模型和原生视图之间连接的一个桥梁。本篇文章以ControlValueAccessor为切入点来逐步认识Angular表单是如何实现的，以及Angular表单的设计哲学，并在最后介绍如何创建表单控件。">
+<meta name="keywords" content="Angular">
+<meta property="og:type" content="article">
+<meta property="og:title" content="从ControlValueAccessor说起——源码分析Angular表单的实现(上)">
+<meta property="og:url" content="https://s33h0w.me/angular/从ControlValueAccessor说起——源码分析Angular表单的实现-上.html">
+<meta property="og:site_name" content="s33h0w">
+<meta property="og:description" content="Angular是一个MVC类框架，Angular表单可以分为模型与视图两部分。ControlValueAccessor是表单模型和原生视图之间连接的一个桥梁。本篇文章以ControlValueAccessor为切入点来逐步认识Angular表单是如何实现的，以及Angular表单的设计哲学，并在最后介绍如何创建表单控件。">
+<meta property="og:locale" content="zh-CN">
+<meta property="og:image" content="http://assets.processon.com/chart_image/5e072790e4b0bb7c58d4ff2c.png">
+<meta property="og:image" content="http://assets.processon.com/chart_image/5e0874bce4b0bb7c58d68651.png">
+<meta property="og:image" content="http://assets.processon.com/chart_image/5e0876c1e4b0125e2926a9d7.png">
+<meta property="og:updated_time" content="2020-08-30T03:12:12.833Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="从ControlValueAccessor说起——源码分析Angular表单的实现(上)">
+<meta name="twitter:description" content="Angular是一个MVC类框架，Angular表单可以分为模型与视图两部分。ControlValueAccessor是表单模型和原生视图之间连接的一个桥梁。本篇文章以ControlValueAccessor为切入点来逐步认识Angular表单是如何实现的，以及Angular表单的设计哲学，并在最后介绍如何创建表单控件。">
+<meta name="twitter:image" content="http://assets.processon.com/chart_image/5e072790e4b0bb7c58d4ff2c.png">
+
+<link rel="canonical" href="https://s33h0w.me/angular/从ControlValueAccessor说起——源码分析Angular表单的实现-上.html">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome: false,
+    isPost: true,
+    isPage: false,
+    isArchive: false
+  };
+</script>
+
+  <title>从ControlValueAccessor说起——源码分析Angular表单的实现(上) | s33h0w</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-meta">
+
+    <div>
+      <a href="/" class="brand" rel="start">
+        <span class="site-title">s33h0w</span>
+      </a>
+    </div>
+        <h1 class="site-subtitle" itemprop="description">be indie</h1>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="切换导航栏">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+</div>
+
+
+<nav class="site-nav">
+  
+  <ul id="menu" class="menu">
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-fw fa-archive"></i>归档</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/about/" rel="section"><i class="fa fa-fw fa-crow"></i>关于</a>
+
+  </li>
+      <li class="menu-item menu-item-search">
+        <a role="button" class="popup-trigger"><i class="fa fa-search fa-fw"></i>搜索
+        </a>
+      </li>
+  </ul>
+
+</nav>
+  <div class="site-search">
+    <div class="popup search-popup">
+    <div class="search-header">
+  <span class="search-icon">
+    <i class="fa fa-search"></i>
+  </span>
+  <div class="search-input-container">
+    <input autocomplete="off" autocorrect="off" autocapitalize="none"
+           placeholder="搜索..." spellcheck="false"
+           type="text" id="search-input">
+  </div>
+  <span class="popup-btn-close">
+    <i class="fa fa-times-circle"></i>
+  </span>
+</div>
+<div id="search-result"></div>
+
+</div>
+<div class="search-pop-overlay"></div>
+
+  </div>
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+  <div class="reading-progress-bar"></div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content">
+            
+
+  <div class="posts-expand">
+      
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block " lang="zh-CN">
+    <link itemprop="mainEntityOfPage" href="https://s33h0w.me/angular/从ControlValueAccessor说起——源码分析Angular表单的实现-上.html">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/s33h0w.png">
+      <meta itemprop="name" content="s33h0w">
+      <meta itemprop="description" content="In the final analysis it is between you and God. It was never between you and them anyway.">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="s33h0w">
+    </span>
+      <header class="post-header">
+        <h2 class="post-title" itemprop="name headline">
+          从ControlValueAccessor说起——源码分析Angular表单的实现(上)
+        </h2>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              <span class="post-meta-item-text">发表于</span>
+
+              <time title="创建时间：2020-01-07 16:36:47" itemprop="dateCreated datePublished" datetime="2020-01-07T16:36:47+08:00">2020-01-07</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>Angular是一个MVC类框架，Angular表单可以分为模型与视图两部分。<code>ControlValueAccessor</code>是表单模型和原生视图之间连接的一个桥梁。本篇文章以<code>ControlValueAccessor</code>为切入点来逐步认识Angular表单是如何实现的，以及Angular表单的设计哲学，并在最后介绍如何创建表单控件。<br><a id="more"></a></p>
+<h2 id="ControlValueAccessor做了哪些事情"><a href="#ControlValueAccessor做了哪些事情" class="headerlink" title="ControlValueAccessor做了哪些事情"></a><code>ControlValueAccessor</code>做了哪些事情</h2><p>让我们首先来认识一下<code>ControlValueAccessor</code>。作为模型与视图之间连接的一个桥梁，<code>ControlValueAccessor</code>必然需要具备<strong>变更视图</strong>和<strong>响应视图变更</strong>的能力。</p>
+<p><code>ControlValueAccessor</code>只是一个接口(<code>Interface</code>)，不具备真正的方法。因此我们找一个实现了这个接口的类进行分析，这里我们选择<code>DefaultValueAccessor</code>。<code>DefaultValueAccessor</code>是一个指令(<code>Directive</code>)，匹配<code>input</code>类型的表单元素，现摘录其部分代码如下。</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">@Directive</span>(&#123;</span><br><span class="line">  selector:</span><br><span class="line">      <span class="string">'input:not([type=checkbox])[formControlName],textarea[formControlName],input:not([type=checkbox])[formControl],textarea[formControl],input:not([type=checkbox])[ngModel],textarea[ngModel],[ngDefaultControl]'</span>,</span><br><span class="line">  host: &#123;</span><br><span class="line">    <span class="string">'(input)'</span>: <span class="string">'$any(this)._handleInput($event.target.value)'</span>,</span><br><span class="line">  &#125;,</span><br><span class="line">&#125;)</span><br><span class="line"><span class="keyword">export</span> <span class="keyword">class</span> DefaultValueAccessor <span class="keyword">implements</span> ControlValueAccessor &#123;</span><br><span class="line">	<span class="keyword">constructor</span>(<span class="params"></span></span><br><span class="line"><span class="params">      <span class="keyword">private</span> _renderer: Renderer2, <span class="keyword">private</span> _elementRef: ElementRef,</span></span><br><span class="line"><span class="params">      <span class="meta">@Optional</span>() <span class="meta">@Inject</span>(COMPOSITION_BUFFER_MODE) <span class="keyword">private</span> _compositionMode: <span class="built_in">boolean</span></span>) &#123;</span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">this</span>._compositionMode == <span class="literal">null</span>) &#123;</span><br><span class="line">      <span class="keyword">this</span>._compositionMode = !_isAndroid();</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  onChange = <span class="function">(<span class="params">_: <span class="built_in">any</span></span>) =&gt;</span> &#123;&#125;;</span><br><span class="line"></span><br><span class="line">	writeValue(value: <span class="built_in">any</span>): <span class="built_in">void</span> &#123;</span><br><span class="line">    <span class="keyword">const</span> normalizedValue = value == <span class="literal">null</span> ? <span class="string">''</span> : value;</span><br><span class="line">    <span class="keyword">this</span>._renderer.setProperty(<span class="keyword">this</span>._elementRef.nativeElement, <span class="string">'value'</span>, normalizedValue);</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  registerOnChange(fn: <span class="function">(<span class="params">_: <span class="built_in">any</span></span>) =&gt;</span> <span class="built_in">void</span>): <span class="built_in">void</span> &#123; <span class="keyword">this</span>.onChange = fn; &#125;</span><br><span class="line"></span><br><span class="line">  _handleInput(value: <span class="built_in">any</span>): <span class="built_in">void</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> (!<span class="keyword">this</span>._compositionMode || (<span class="keyword">this</span>._compositionMode &amp;&amp; !<span class="keyword">this</span>._composing)) &#123;</span><br><span class="line">      <span class="keyword">this</span>.onChange(value);</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><em>顺便提下，观察<code>@Directive</code>的<code>selector</code>部分可以发现，<code>DefaultValueAccessor</code>会被响应式表单(<code>FormControlName</code>、<code>FormControlDirective</code>)和模板驱动表单(<code>ngModel</code>)同时使用。之后我们在分析响应式和模板驱动的数据流时便无需考虑<code>ControlValueAccessor</code>的异同。</em></p>
+<h3 id="变更视图"><a href="#变更视图" class="headerlink" title="变更视图"></a>变更视图</h3><p>现在让我们思考一下，如果想要变更视图，那么一定需要提供一个向原生元素赋值的方法。</p>
+<p>于是很容易便能发现在<code>writeValue</code>方法中，<code>DefaultValueAccessor</code>通过<code>Renderer.setProperty</code>方法向原生元素写入值。因此<code>DefaultValueAccessor</code>是可以变更视图的。</p>
+<h3 id="响应视图变更"><a href="#响应视图变更" class="headerlink" title="响应视图变更"></a>响应视图变更</h3><p>接下来再看<code>DefaultValueAccessor</code>如何响应视图变更。前面已经提到<code>DefaultValueAccessor</code>用来匹配<code>input</code>类型的表单元素，因此视图变更指的就是<code>input</code>事件。</p>
+<p>我们注意到在<code>@Directive</code>装饰器的<code>host</code>内，宿主元素的<code>input</code>事件被映射到<code>this._handleInput</code>方法中，该方法内执行了<code>this.onChange(value)</code>。而<code>onChange</code>方法在<code>registerOnChange</code>中被传入的参数注册赋值。也就是说，如果我们提前将”一些行为”作为参数传递给<code>DefaultValueAccessor.registerOnChange</code>，那么当视图变更的时候，就会执行”这些行为”，以此响应视图变更事件。不难想象，”这些行为”里可能包含”改变模型的值”、”触发ngOnChange”等等。</p>
+<p>下面的图示说明了<code>ControlValueAccessor</code>是如何连接模型与视图的。</p>
+<p><img src="http://assets.processon.com/chart_image/5e072790e4b0bb7c58d4ff2c.png" alt="ControlValueAccessor是连接模型与视图的桥梁"></p>
+<p>可以看到，<code>ControlValueAccessor</code>这个指令可以赋予表单控件变更视图与响应视图变更的能力。这是Angular实现表单控件的基础。</p>
+<h3 id="什么是表单模型"><a href="#什么是表单模型" class="headerlink" title="什么是表单模型"></a>什么是表单模型</h3><p>我们已经知道<code>ControlValueAccessor</code>是连接模型与视图的桥梁，那么请再思考一下：什么是表单模型？响应式表单和模板驱动表单的表单模型一样吗？</p>
+<p>这里先给出答案，无论是在响应式表单还是模板驱动表单，表单模型都指的是<span class="exturl" data-url="aHR0cHM6Ly9hbmd1bGFyLmNuL2FwaS9mb3Jtcy9Gb3JtQ29udHJvbA==" title="https://angular.cn/api/forms/FormControl"><code>FormControl</code><i class="fa fa-external-link"></i></span>。接下来的篇章中我们会仔细分析响应式表单和模板驱动表单中模型与视图之间数据的流动。</p>
+<h2 id="响应式表单和模板驱动表单中的数据流"><a href="#响应式表单和模板驱动表单中的数据流" class="headerlink" title="响应式表单和模板驱动表单中的数据流"></a>响应式表单和模板驱动表单中的数据流</h2><p>响应式表单(Reactive Form)和模板驱动表单(Template-driven Form)是Angular提供的两种不同的表单处理方式。我们会通过分析”从视图到模型”与”从模型到视图”的数据流来比较两者实现方式的异同。</p>
+<h3 id="响应式表单"><a href="#响应式表单" class="headerlink" title="响应式表单"></a>响应式表单</h3><p>下面是一个响应式表单控件。</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123; Component &#125; <span class="keyword">from</span> <span class="string">'@angular/core'</span>;</span><br><span class="line"><span class="keyword">import</span> &#123; FormControl &#125; <span class="keyword">from</span> <span class="string">'@angular/forms'</span>;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Component</span>(&#123;</span><br><span class="line">  selector: <span class="string">'app-reactive-favorite-color'</span>,</span><br><span class="line">  template: <span class="string">`</span></span><br><span class="line"><span class="string">    Favorite Color: &lt;input type="text" [formControl]="favoriteColorControl"&gt;</span></span><br><span class="line"><span class="string">  `</span></span><br><span class="line">&#125;)</span><br><span class="line"><span class="keyword">export</span> <span class="keyword">class</span> FavoriteColorComponent &#123;</span><br><span class="line">  favoriteColorControl = <span class="keyword">new</span> FormControl(<span class="string">''</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="FormControlDirective"><a href="#FormControlDirective" class="headerlink" title="FormControlDirective"></a><code>FormControlDirective</code></h4><p>观察表单控件的模板<code>&lt;input type=&quot;text&quot; [formControl]=&quot;favoriteColorControl&quot;&gt;</code>，我们发现它有一个<span class="exturl" data-url="aHR0cHM6Ly9hbmd1bGFyLmNuL2d1aWRlL2F0dHJpYnV0ZS1kaXJlY3RpdmVz" title="https://angular.cn/guide/attribute-directives">属性型指令<i class="fa fa-external-link"></i></span>——<code>[formControl]</code>。<code>formControl</code>被绑定为组件的<code>favoriteColorControl</code> 属性，这是一个<code>FormControl</code>实例。</p>
+<p>问题来了，如何同步视图（<code>input</code>元素）与模型（<code>FormConrol</code>实例）呢？</p>
+<p>前面已经讲述了<code>ControlValueAccessor</code>可以<strong>变更视图</strong>（<code>writeValue</code>）和<strong>响应视图变更</strong>(<code>onChange</code>)。然而，到底是谁调用了<code>ControlValueAccessor.wirteValue</code>去变更视图，又是谁调用了<code>ControlValueAccessor.registerOnChange</code>注册了响应视图变更的函数？显然组件本身的代码中不包含这些，一定还有一个中间人在穿针引线。如何去寻找这个中间人？</p>
+<p>响应式表单的最明显的特征就是<code>[formControl]</code>这个属性型指令，通过查找选择器为<code>[formControl]</code>的指令，我们发现了<span class="exturl" data-url="aHR0cHM6Ly9hbmd1bGFyLmNuL2FwaS9mb3Jtcy9Gb3JtQ29udHJvbERpcmVjdGl2ZQ==" title="https://angular.cn/api/forms/FormControlDirective"><code>FormControlDirective</code><i class="fa fa-external-link"></i></span>。下面是<code>FormControlDirective</code>的部分代码。</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// FormControlDirective</span></span><br><span class="line"><span class="meta">@Directive</span>(&#123;selector: <span class="string">'[formControl]'</span>, providers: [formControlBinding], exportAs: <span class="string">'ngForm'</span>&#125;)</span><br><span class="line"><span class="keyword">export</span> <span class="keyword">class</span> FormControlDirective <span class="keyword">extends</span> NgControl <span class="keyword">implements</span> OnChanges &#123;</span><br><span class="line">  <span class="meta">@Input</span>(<span class="string">'formControl'</span>) form !: FormControl;</span><br><span class="line">  </span><br><span class="line">	ngOnChanges(changes: SimpleChanges): <span class="built_in">void</span> &#123;</span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">this</span>._isControlChanged(changes)) &#123;</span><br><span class="line">      setUpControl(<span class="keyword">this</span>.form, <span class="keyword">this</span>);</span><br><span class="line">    <span class="keyword">if</span> (<span class="keyword">this</span>.control.disabled &amp;&amp; <span class="keyword">this</span>.valueAccessor !.setDisabledState) &#123;</span><br><span class="line">      <span class="keyword">this</span>.valueAccessor !.setDisabledState !(<span class="literal">true</span>);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">this</span>.form.updateValueAndValidity(&#123;emitEvent: <span class="literal">false</span>&#125;);</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">if</span> (isPropertyUpdated(changes, <span class="keyword">this</span>.viewModel)) &#123;</span><br><span class="line">      _ngModelWarning(</span><br><span class="line">        <span class="string">'formControl'</span>, FormControlDirective, <span class="keyword">this</span>, <span class="keyword">this</span>._ngModelWarningConfig);</span><br><span class="line">      <span class="keyword">this</span>.form.setValue(<span class="keyword">this</span>.model);</span><br><span class="line">      <span class="keyword">this</span>.viewModel = <span class="keyword">this</span>.model;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  ...</span><br><span class="line">&#125;</span><br><span class="line"><span class="comment">// setUpControl</span></span><br><span class="line"><span class="keyword">export</span> <span class="function"><span class="keyword">function</span> <span class="title">setUpControl</span>(<span class="params">control: FormControl, dir: NgControl</span>): <span class="title">void</span> </span>&#123;</span><br><span class="line">   setUpViewChangePipeline(control, dir);</span><br><span class="line">   setUpModelChangePipeline(control, dir);</span><br><span class="line">  ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以看出，<code>FormControlDirective</code>通过选择器<code>[formControl]</code>匹配响应式表单控件，并接受<code>[formControl]</code>作为它的一个输入属性。</p>
+<p>在<code>FormControlDirective</code>刚开始接收一个<code>FormControl</code>输入属性时，它就将<code>FormControl</code>实例注册给两个函数——<code>setUpViewChangePipeline</code>和<code>setUpModelChangePipeline</code>。这两个函数分别代表着”从视图到模型”和”从模型到视图”两个过程。</p>
+<h4 id="从视图到模型"><a href="#从视图到模型" class="headerlink" title="从视图到模型"></a>从视图到模型</h4><figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">setUpViewChangePipeline</span>(<span class="params">control: FormControl, dir: NgControl</span>): <span class="title">void</span> </span>&#123;</span><br><span class="line">  dir.valueAccessor !.registerOnChange(<span class="function">(<span class="params">newValue: <span class="built_in">any</span></span>) =&gt;</span> &#123;</span><br><span class="line">    control._pendingValue = newValue;</span><br><span class="line">    control._pendingChange = <span class="literal">true</span>;</span><br><span class="line">    control._pendingDirty = <span class="literal">true</span>;</span><br><span class="line"></span><br><span class="line">    <span class="keyword">if</span> (control.updateOn === <span class="string">'change'</span>) updateControl(control, dir);</span><br><span class="line">  &#125;);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">updateControl</span>(<span class="params">control: FormControl, dir: NgControl</span>): <span class="title">void</span> </span>&#123;</span><br><span class="line">  <span class="keyword">if</span> (control._pendingDirty) control.markAsDirty();</span><br><span class="line">  control.setValue(control._pendingValue, &#123;emitModelToViewChange: <span class="literal">false</span>&#125;);</span><br><span class="line">  dir.viewToModelUpdate(control._pendingValue);</span><br><span class="line">  control._pendingChange = <span class="literal">false</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>可以看到，<code>setUpViewChangePipeline</code>仅仅调用了<code>valueAccessor.registerOnChange</code>，去注册响应视图变更的函数。因此，当视图变更的时候，将会执行<code>updateControl</code>，赋值给<code>FormControl</code>，这就是”从视图到模型”的数据流。</p>
+<h4 id="从模型到视图"><a href="#从模型到视图" class="headerlink" title="从模型到视图"></a>从模型到视图</h4><figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="keyword">function</span> <span class="title">setUpModelChangePipeline</span>(<span class="params">control: FormControl, dir: NgControl</span>): <span class="title">void</span> </span>&#123;</span><br><span class="line">  control.registerOnChange(<span class="function">(<span class="params">newValue: <span class="built_in">any</span>, emitModelEvent: <span class="built_in">boolean</span></span>) =&gt;</span> &#123;</span><br><span class="line">    <span class="comment">// control -&gt; view</span></span><br><span class="line">    dir.valueAccessor !.writeValue(newValue);</span><br><span class="line"></span><br><span class="line">    <span class="comment">// control -&gt; ngModel</span></span><br><span class="line">    <span class="keyword">if</span> (emitModelEvent) dir.viewToModelUpdate(newValue);</span><br><span class="line">  &#125;);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p><code>setUpModelChangePipeline</code>也注册(<code>control.registerOnChange</code>)了一个响应变更的函数，不过不是视图变更(<code>input</code> event)，而是模型变更(<code>FormControl.valueChanges</code>)。Angular官方文档中如此描述<code>FormControl</code>的<code>registerOnChange</code>方法：“Register a listener for change events”。因此，当模型发生变更时，将会执行<code>valueAccessor.writeValue</code>，将值写入视图，从而实现视图的变更。这就是”从模型到视图”的数据流。</p>
+<p>下面的图示以<code>FormControlDirective</code>为例表明了在响应式表单中的数据流动情况。</p>
+<p><img src="http://assets.processon.com/chart_image/5e0874bce4b0bb7c58d68651.png" alt="响应式表单"></p>
+<h3 id="模板驱动表单"><a href="#模板驱动表单" class="headerlink" title="模板驱动表单"></a>模板驱动表单</h3><p>下面是一个模板驱动式表单控件。</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">import</span> &#123; Component &#125; <span class="keyword">from</span> <span class="string">'@angular/core'</span>;</span><br><span class="line"></span><br><span class="line"><span class="meta">@Component</span>(&#123;</span><br><span class="line">  selector: <span class="string">'app-template-favorite-color'</span>,</span><br><span class="line">  template: <span class="string">`</span></span><br><span class="line"><span class="string">    Favorite Color: &lt;input type="text" [(ngModel)]="favoriteColor"&gt;</span></span><br><span class="line"><span class="string">  `</span></span><br><span class="line">&#125;)</span><br><span class="line"><span class="keyword">export</span> <span class="keyword">class</span> FavoriteColorComponent &#123;</span><br><span class="line">  favoriteColor = <span class="string">''</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<h4 id="NgModel"><a href="#NgModel" class="headerlink" title="NgModel"></a><code>NgModel</code></h4><p>和响应式表单一样，模板驱动表单也需要一个中间人来控制<code>ControlValueAccessor</code>，从而变更视图和响应视图变更。这个中间人是<span class="exturl" data-url="aHR0cHM6Ly9hbmd1bGFyLmNuL2FwaS9mb3Jtcy9OZ01vZGVs" title="https://angular.cn/api/forms/NgModel"><code>NgModel</code><i class="fa fa-external-link"></i></span>，它也是一个指令。它通过选择器<code>[ngModel]:not([formControlName]):not([formControl])</code>来匹配模板驱动表单。</p>
+<p>和<code>FormControlDirective</code>一样，<code>NgModel</code>也是通过<code>FormControl</code>做为模型去映射视图。下面是这两个指令的部分代码。</p>
+<figure class="highlight typescript"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// FormControlDirective</span></span><br><span class="line"><span class="meta">@Directive</span>(&#123;selector: <span class="string">'[formControl]'</span>, providers: [formControlBinding], exportAs: <span class="string">'ngForm'</span>&#125;)</span><br><span class="line"><span class="keyword">export</span> <span class="keyword">class</span> FormControlDirective <span class="keyword">extends</span> NgControl <span class="keyword">implements</span> OnChanges &#123;</span><br><span class="line">  <span class="meta">@Input</span>(<span class="string">'formControl'</span>) form !: FormControl;</span><br><span class="line">  ...</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// NgModel</span></span><br><span class="line"><span class="meta">@Directive</span>(&#123;</span><br><span class="line">  selector: <span class="string">'[ngModel]:not([formControlName]):not([formControl])'</span>,</span><br><span class="line">  providers: [formControlBinding],</span><br><span class="line">  exportAs: <span class="string">'ngModel'</span></span><br><span class="line">&#125;)</span><br><span class="line"><span class="keyword">export</span> <span class="keyword">class</span> NgModel <span class="keyword">extends</span> NgControl <span class="keyword">implements</span> OnChanges, OnDestroy &#123;</span><br><span class="line">  <span class="keyword">public</span> readonly control: FormControl = <span class="keyword">new</span> FormControl();</span><br><span class="line">  <span class="meta">@Input</span>(<span class="string">'ngModel'</span>) model: <span class="built_in">any</span>;</span><br><span class="line">  <span class="meta">@Output</span>(<span class="string">'ngModelChange'</span>) update = <span class="keyword">new</span> EventEmitter();</span><br><span class="line">  <span class="comment">// this.model变化时调用该函数，传入的参数为this.model</span></span><br><span class="line">  <span class="keyword">private</span> _updateValue(value: <span class="built_in">any</span>): <span class="built_in">void</span> &#123;</span><br><span class="line">    resolvedPromise.then(</span><br><span class="line">        () =&gt; &#123; <span class="keyword">this</span>.control.setValue(value, &#123;emitViewToModelChange: <span class="literal">false</span>&#125;); &#125;);</span><br><span class="line">  &#125;</span><br><span class="line">  viewToModelUpdate(newValue: <span class="built_in">any</span>): <span class="built_in">void</span> &#123;</span><br><span class="line">    <span class="keyword">this</span>.viewModel = newValue;</span><br><span class="line">    <span class="keyword">this</span>.update.emit(newValue);</span><br><span class="line">  &#125;</span><br><span class="line">  ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>由于<code>NgModel</code>不会像<code>FormControlDirective</code>那样接受一个<code>FormControl</code>实例作为属性，因此它在指令内部自己创建了一个<code>FormControl</code>实例，并且使用<code>_updateValue</code>将从控件获取的值<code>this.model</code>赋值给这个<code>FormControl</code>实例。接下来就和<code>FormControlDirective</code>一样了，<code>NgModel</code>会将自己创建的<code>FormControl</code>实例注册给<code>setUpViewChangePipeline</code>和<code>setUpModelChangePipeline</code>，从而实现”从视图到模型”和”从模型到视图”的数据流动。</p>
+<h4 id="从视图到模型-1"><a href="#从视图到模型-1" class="headerlink" title="从视图到模型"></a>从视图到模型</h4><p>再次回到<a href="####从视图到模型"><code>setUpViewChangePipeline</code></a>，我们发现视图变更除了会赋值给<code>FormControl</code>之外，还会执行<code>dir.viewToModelUpdate</code>（此处的<code>dir</code>使用的是<code>NgModel</code>实例），也就是触发<code>ngModelChange</code>事件。如果表单控件采用了双向绑定（比如我们的示例表单控件中的<code>[(ngModel)]=&quot;favoriateColor&quot;</code>），那么控件中的值（此例中为<code>favoriateColor</code>）也会在<code>ngModelChange</code>中被改变。</p>
+<h4 id="从模型到视图-1"><a href="#从模型到视图-1" class="headerlink" title="从模型到视图"></a>从模型到视图</h4><p>在<a href="####从模型到视图"><code>setUpViewChangePipeline</code></a>中，模型的变更所引起的操作除了包含向视图中写入值(<code>valueAccessor.writeValue</code>)，同时也会更新<code>ngModel</code>的值(<code>dir.viewToModelUpdate</code>)。</p>
+<p>由此我们可以看到，无论响应式表单和模板驱动表单，模型与视图之间的交互都是<code>FormControl</code>与<code>ControlValueAccessor</code>完成的。不同的地方在于，响应式表单直接暴露了<code>FormControl</code>实例作为输入属性控，而模板驱动表单则使用自己创建的<code>FormControl</code>实例同时控制<code>ngModel</code>和视图。因此在以上的两个流程中模板驱动表单总会比响应式表单多一个额外的步骤——更新<code>ngModel</code>，而更重要的是在<code>NgModel._updateValue</code>这个方法中我们发现变更模型其实是一个异步操作。而且如果采用了双向绑定，那么便无法追踪具有唯一性的变更，因为<code>formControl.registerOnChange</code>所注册的变更响应函数和<code>ngModelChange</code>都会触发。简而言之，模板驱动表单的副作用实在太多了，比起它来同步的、不可变的响应式表单才更符合Angular的响应式编程模式。</p>
+<p>下面的图示以<code>NgModel</code>为例表明了在模板驱动式表单中的数据流动情况。</p>
+<p><img src="http://assets.processon.com/chart_image/5e0876c1e4b0125e2926a9d7.png" alt="模板驱动式表单"></p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+          
+          <div class="post-tags">
+              <a href="/tags/Angular/" rel="tag"><i class="fa fa-tag"></i> Angular</a>
+          </div>
+
+        
+
+          <div class="post-nav">
+            <div class="post-nav-next post-nav-item">
+                <a href="/angular/Angular项目如何组织一个良好的目录结构.html" rel="next" title="Angular项目如何组织一个良好的目录结构">
+                  <i class="fa fa-chevron-left"></i> Angular项目如何组织一个良好的目录结构
+                </a>
+            </div>
+
+            <span class="post-nav-divider"></span>
+
+            <div class="post-nav-prev post-nav-item">
+                <a href="/refactoring/重构训练01——过长函数(Long-Method).html" rel="prev" title="重构训练01——过长函数(Long-Method)">
+                  重构训练01——过长函数(Long-Method) <i class="fa fa-chevron-right"></i>
+                </a>
+            </div>
+          </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+  </div>
+
+
+          </div>
+          
+    <div class="comments" id="gitalk-container"></div>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          文章目录
+        </li>
+        <li class="sidebar-nav-overview">
+          站点概览
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-2"><a class="nav-link" href="#ControlValueAccessor做了哪些事情"><span class="nav-number">1.</span> <span class="nav-text">ControlValueAccessor做了哪些事情</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#变更视图"><span class="nav-number">1.1.</span> <span class="nav-text">变更视图</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#响应视图变更"><span class="nav-number">1.2.</span> <span class="nav-text">响应视图变更</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#什么是表单模型"><span class="nav-number">1.3.</span> <span class="nav-text">什么是表单模型</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#响应式表单和模板驱动表单中的数据流"><span class="nav-number">2.</span> <span class="nav-text">响应式表单和模板驱动表单中的数据流</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#响应式表单"><span class="nav-number">2.1.</span> <span class="nav-text">响应式表单</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#FormControlDirective"><span class="nav-number">2.1.1.</span> <span class="nav-text">FormControlDirective</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#从视图到模型"><span class="nav-number">2.1.2.</span> <span class="nav-text">从视图到模型</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#从模型到视图"><span class="nav-number">2.1.3.</span> <span class="nav-text">从模型到视图</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#模板驱动表单"><span class="nav-number">2.2.</span> <span class="nav-text">模板驱动表单</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#NgModel"><span class="nav-number">2.2.1.</span> <span class="nav-text">NgModel</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#从视图到模型-1"><span class="nav-number">2.2.2.</span> <span class="nav-text">从视图到模型</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#从模型到视图-1"><span class="nav-number">2.2.3.</span> <span class="nav-text">从模型到视图</span></a></li></ol></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+    <img class="site-author-image" itemprop="image" alt="s33h0w"
+      src="/images/s33h0w.png">
+  <p class="site-author-name" itemprop="name">s33h0w</p>
+  <div class="site-description" itemprop="description">In the final analysis it is between you and God. It was never between you and them anyway.</div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">18</span>
+          <span class="site-state-item-name">日志</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+            <a href="/tags/">
+        <span class="site-state-item-count">5</span>
+        <span class="site-state-item-name">标签</span></a>
+      </div>
+  </nav>
+</div>
+  <div class="feed-link motion-element">
+    <a href="/atom.xml" rel="alternate">
+      <i class="fa fa-rss"></i>RSS
+    </a>
+  </div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <span class="exturl" data-url="aHR0cHM6Ly9naXRodWIuY29tL3MzM2gwdw==" title="GitHub → https://github.com/s33h0w"><i class="fa fa-fw fa-github"></i></span>
+      </span>
+      <span class="links-of-author-item">
+        <span class="exturl" data-url="aHR0cHM6Ly93d3cuZG91YmFuLmNvbS9wZW9wbGUvNTY0MDAyMTQ=" title="豆瓣 → https://www.douban.com/people/56400214"><i class="fa fa-fw fa-custom douban"></i></span>
+      </span>
+      <span class="links-of-author-item">
+        <span class="exturl" data-url="aHR0cHM6Ly93d3cuemhpaHUuY29tL3Blb3BsZS9zMzNoMHc=" title="知乎 → https://www.zhihu.com/people/s33h0w"><i class="fa fa-fw fa-custom zhihu"></i></span>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+<div class="copyright">
+  
+  &copy; 2018 – 
+  <span itemprop="copyrightYear">2021</span>
+  <span class="with-love">
+    <i class="fa fa-crow"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder"><span class="exturl theme-link" data-url="aHR0cHM6Ly9naXRodWIuY29tL3MzM2gwdw==">s33h0w</span>
+  </span>
+</div>
+
+        
+
+
+
+
+
+
+
+
+
+
+
+
+        
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+<script src="/js/utils.js"></script><script src="/js/motion.js"></script>
+<script src="/js/schemes/muse.js"></script>
+<script src="/js/next-boot.js"></script>
+
+
+
+  
+  <script>
+    (function(){
+      var bp = document.createElement('script');
+      var curProtocol = window.location.protocol.split(':')[0];
+      bp.src = (curProtocol === 'https') ? 'https://zz.bdstatic.com/linksubmit/push.js' : 'http://push.zhanzhang.baidu.com/push.js';
+      var s = document.getElementsByTagName("script")[0];
+      s.parentNode.insertBefore(bp, s);
+    })();
+  </script>
+
+
+
+
+  <script src="/js/local-search.js"></script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+<link rel="stylesheet" href="//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.css">
+
+<script>
+  NexT.utils.getScript('//cdn.jsdelivr.net/npm/gitalk@1/dist/gitalk.min.js', () => {
+    var gitalk = new Gitalk({
+      clientID: '911aba6a2761f62d8739',
+      clientSecret: '7df6a704729a996fc519bea74e3615f585b49d1c',
+      repo: 's33h0w.github.io',
+      owner: 's33h0w',
+      admin: ['s33h0w'],
+      id: '1d2a7f8f2bcc9adf5c5a3a216446571b',
+        language: 'zh-CN',
+      distractionFreeMode: 'true'
+    });
+    gitalk.render('gitalk-container');
+  }, window.Gitalk);
+</script>
+
+</body>
+</html>
